@@ -1,0 +1,4 @@
+./seq-length-analysis DiskSimInputTrace-Policy_pagelru-Threshold_-MSRTrace_CAM-01-SRV-lvm0.trace analyzed-DiskSimInputTrace-Policy_pagelru-Threshold_-MSRTrace_CAM-01-SRV-lvm0.trace
+./seq-length-analysis DiskSimInputTrace-Policy_pagelru-Threshold_-MSRTrace_CAMRESWEBA03-lvm0.trace analyzed-DiskSimInputTrace-Policy_pagelru-Threshold_-MSRTrace_CAMRESWEBA03-lvm0.trace
+./seq-length-analysis DiskSimInputTrace-Policy_pagelru-Threshold_-MSRTrace_CAMRESIRA01-lvm0.trace analyzed-DiskSimInputTrace-Policy_pagelru-Threshold_-MSRTrace_CAMRESIRA01-lvm0.trace
+./seq-length-analysis DiskSimInputTrace-Policy_pagelru-Threshold_-MSRTrace_CAMWEBDEV-lvm0.trace analyzed-DiskSimInputTrace-Policy_pagelru-Threshold_-MSRTrace_CAMWEBDEV-lvm0.trace

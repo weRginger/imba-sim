@@ -1,0 +1,3 @@
+March 5th 2015
+1. Add read request to disksim input trace, which is actually cache miss on main memory page cache
+	Target algorithm: lru, cflru, lru-wsr, iocache, iocache-threshold, lru-dram, arc

@@ -1,0 +1,1 @@
+./disksim ./Seagate-Cheetah15k5.parv ./DiskSimOutput-Policy_dynamiclru-Threshold_8-MSRTrace_test.outv ascii DiskSimInputTrace-Policy_dynamiclru-Threshold_8-MSRTrace_test.trace 0
