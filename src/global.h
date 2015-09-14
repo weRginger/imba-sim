@@ -52,7 +52,7 @@ const uint32_t PCR = 256;
 const uint32_t DIRTY = 512;
 const uint32_t SEQEVICT = 1024;
 const uint32_t LESSSEQEVICT = 2048;
-///ziqi: used for LRU-WSR
+///ziqi: used for LRU-WSR and CLOCK
 const uint32_t COLD = 4096;
 const uint32_t INF = 0xFFFFFFFF;
 

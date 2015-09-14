@@ -163,7 +163,7 @@ public:
                 const V v = _fn(k, value);
                 // Record k as most-recently-used key
                 typename key_tracker_type::iterator itNew
-                = _key_tracker.insert(_key_tracker.end(), k);
+                    = _key_tracker.insert(_key_tracker.end(), k);
                 // Create the key-value entry,
                 // linked to the usage record.
                 _key_to_value.insert(make_pair(k, make_pair(v, itNew)));

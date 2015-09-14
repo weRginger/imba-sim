@@ -371,12 +371,12 @@ int main(int argc, char **argv)
     Initialize(argc, argv, memTrace);
 
     if(_gConfiguration.GetAlgName(0).compare("lru") == 0
-	    ||_gConfiguration.GetAlgName(0).compare("arc") == 0
-	    ||_gConfiguration.GetAlgName(0).compare("harc") == 0)
-	    /*
+            ||_gConfiguration.GetAlgName(0).compare("arc") == 0
+            ||_gConfiguration.GetAlgName(0).compare("harc") == 0)
+        /*
             ||_gConfiguration.GetAlgName(0).compare("lru-dram") == 0
             ||_gConfiguration.GetAlgName(0).compare("lru-wsr") == 0
-            ||_gConfiguration.GetAlgName(0).compare("darc") == 0          
+            ||_gConfiguration.GetAlgName(0).compare("darc") == 0
             ||_gConfiguration.GetAlgName(0).compare("cflru") == 0
             ||_gConfiguration.GetAlgName(0).compare("nvm-dram") == 0
             ||_gConfiguration.GetAlgName(0).compare("hybrid-dynamic") == 0
@@ -393,7 +393,7 @@ int main(int argc, char **argv)
     ///used by lru_ziqi, iocache-threshold
     else
         threshold = _gConfiguration.seqThreshold;
-    
+
     /*
     if(_gConfiguration.GetAlgName(0).compare("nvm-dram") == 0
             ||_gConfiguration.GetAlgName(0).compare("hybrid-dynamic") == 0
