@@ -5,7 +5,7 @@
 ///trace
 #include <iostream>
 #include <fstream>
-std::ofstream outfile("fileserver_2000_RWandLBA.tmp");
+///std::ofstream outfile("fileserver_2000_RWandLBA.tmp");
 ///trace
 
 
@@ -193,7 +193,7 @@ bool  getAndParseMSR(std::ifstream &inputTrace, reqAtom *newn)
             newn->fsblkno = byteoff ; //convert byte2sector and align to page size
 
             ///trace
-            outfile<<newn->fsblkno;
+            ///outfile<<newn->fsblkno;
             ///trace
 
             //TODO: fix this line
@@ -228,7 +228,7 @@ bool  getAndParseMSR(std::ifstream &inputTrace, reqAtom *newn)
                 newn->flags = WRITE;
 
                 ///trace
-                outfile<<"W"<<std::endl;
+                ///outfile<<"W"<<std::endl;
                 ///trace
 
             }
@@ -236,7 +236,7 @@ bool  getAndParseMSR(std::ifstream &inputTrace, reqAtom *newn)
                 newn->flags = READ;
 
                 ///trace
-                outfile<<"R"<<std::endl;
+                ///outfile<<"R"<<std::endl;
                 ///trace
 
             }
