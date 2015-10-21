@@ -1,5 +1,5 @@
 //
-// C++ Interface: clock cache policy
+// C++ Interface: CLOCK Adaptive Replacement
 //
 // Description:
 //
@@ -9,8 +9,8 @@
 // Copyright: See COPYING file that comes with this distribution
 //
 
-#ifndef CLOCK_H
-#define CLOCK_H
+#ifndef CAR_H
+#define CAR_H
 
 #include <map>
 #include <list>
@@ -36,7 +36,7 @@ extern int writeHitOnClean;
 // LRU-replacement cache of a function with signature
 // V f(K)
 template <typename K, typename V>
-class CLOCK : public TestCache<K, V>
+class CAR : public TestCache<K, V>
 {
 public:
     typedef list<K> key_tracker_type;
@@ -48,7 +48,7 @@ public:
     //for first item in trace, it is used to initiate the clock hand
     bool initClockHand = true;
 
-    CLOCK(
+    CAR(
         V(*f)(const K & , V),
         size_t c,
         unsigned levelMinus
@@ -135,8 +135,6 @@ public:
                 initClockHand = false;
 
                 _key_tracker.insert(_key_tracker.end(), k);
-		//set the page to be cold before insertion
-		value.updateFlags(value.getFlags() | COLD);
                 const V v = _fn(k, value);
                 _key_to_value.insert(make_pair(k, v));
                 PRINTV(logfile << "Insert page to clock: " << k << endl;);
@@ -162,8 +160,6 @@ public:
                 assert(it_list_clock != _key_tracker.end());
                 assert(!_key_tracker.empty());
                 _key_tracker.insert(it_list_clock, k);
-		//set the page to be cold before insertion
-		value.updateFlags(value.getFlags() | COLD);
                 const V v = _fn(k, value);
                 _key_to_value.insert(make_pair(k, v));
                 PRINTV(logfile << "Insert page to clock: " << k << endl;);

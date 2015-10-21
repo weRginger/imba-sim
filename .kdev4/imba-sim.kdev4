@@ -20,3 +20,6 @@ Configured Launch Modes=execute
 Configured Launchers=scriptAppLauncher
 Name=New Script Application Launcher
 Type=Script Application
+
+[Project]
+VersionControlSupport=kdevgit
