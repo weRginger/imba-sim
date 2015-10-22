@@ -13,6 +13,7 @@
 #include "clock.h"
 #include "stats.h"
 #include "min.h"
+#include "car.h"
 //#include "lru-wsr.h"
 //#include "darc.h"
 //#include "darc2.h"
