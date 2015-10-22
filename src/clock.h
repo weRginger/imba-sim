@@ -40,7 +40,7 @@ class CLOCK : public TestCache<K, V>
 {
 public:
     typedef list<K> key_tracker_type;
-    typedef map< K, V> 	key_to_value_type;
+    typedef map< K, V> key_to_value_type;
 
     //store the clock hand, the value is the key of the key_to_value_type
     //when need to evict, clock scans starting from the item with the key stored in clockHand
@@ -135,8 +135,8 @@ public:
                 initClockHand = false;
 
                 _key_tracker.insert(_key_tracker.end(), k);
-		//set the page to be cold before insertion
-		value.updateFlags(value.getFlags() | COLD);
+                //set the page to be cold before insertion
+                value.updateFlags(value.getFlags() | COLD);
                 const V v = _fn(k, value);
                 _key_to_value.insert(make_pair(k, v));
                 PRINTV(logfile << "Insert page to clock: " << k << endl;);
@@ -162,8 +162,8 @@ public:
                 assert(it_list_clock != _key_tracker.end());
                 assert(!_key_tracker.empty());
                 _key_tracker.insert(it_list_clock, k);
-		//set the page to be cold before insertion
-		value.updateFlags(value.getFlags() | COLD);
+                //set the page to be cold before insertion
+                value.updateFlags(value.getFlags() | COLD);
                 const V v = _fn(k, value);
                 _key_to_value.insert(make_pair(k, v));
                 PRINTV(logfile << "Insert page to clock: " << k << endl;);

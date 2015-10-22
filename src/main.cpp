@@ -162,6 +162,9 @@ void	Initialize(int argc, char **argv, deque<reqAtom> & memTrace)
         else if(_gConfiguration.GetAlgName(i).compare("clock") == 0) {
             _gTestCache[i] = new CLOCK<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
         }
+        else if(_gConfiguration.GetAlgName(i).compare("car") == 0) {
+            _gTestCache[i] = new CAR<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+        }
         /*
         else if(_gConfiguration.GetAlgName(i).compare("hybrid-dynamic") == 0) {
             _gTestCache[i] = new HybridDynamic<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
@@ -372,7 +375,9 @@ int main(int argc, char **argv)
 
     if(_gConfiguration.GetAlgName(0).compare("lru") == 0
             ||_gConfiguration.GetAlgName(0).compare("arc") == 0
-            ||_gConfiguration.GetAlgName(0).compare("harc") == 0)
+            ||_gConfiguration.GetAlgName(0).compare("harc") == 0
+            ||_gConfiguration.GetAlgName(0).compare("clock") == 0
+            ||_gConfiguration.GetAlgName(0).compare("car") == 0)
         /*
             ||_gConfiguration.GetAlgName(0).compare("lru-dram") == 0
             ||_gConfiguration.GetAlgName(0).compare("lru-wsr") == 0
