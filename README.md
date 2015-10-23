@@ -9,7 +9,7 @@ Done
 
 To do list
 =========
-- LB-ARC
+- LB-CAR
 - FAB
 - BPLRU
-- LB-Clock
+- LB-CLOCK
