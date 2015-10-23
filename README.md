@@ -1,6 +1,6 @@
-Copyright: Alireza Haghdoost, Ziqi Fan
+Copyright: Alireza Haghdoost, Ziqi Fan (fanxx234@umn.edu)
 
-University of Minnesota: Twin Cities
+University of Minnesota-Twin Cities
 
 Done
 =========
