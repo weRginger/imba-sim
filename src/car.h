@@ -41,9 +41,6 @@ public:
     // when need to evict, clock scans starting from the item with the key stored in clockHand
     uint32_t clockHand_t1 = 0;
     uint32_t clockHand_t2 = 0;
-    // for first item in trace, it is used to initiate the clock hand
-    bool initClockHand_t1 = true;
-    bool initClockHand_t2 = true;
 
     CAR(
         V(*f)(const K & , V),
@@ -133,9 +130,7 @@ public:
             if( it_b1 == b1.end() && it_b2 == b2.end() ) {
                 ///insert page
                 //for the very first item in the trace, use it as the clockHand
-                if(initClockHand_t1) {
-                    initClockHand_t1 = false;
-
+                if(t1.size() == 0) {
                     t1_key.insert(t1_key.end(), k);
                     //set the page to be cold before insertion
                     value.updateFlags(value.getFlags() | COLD);
@@ -200,9 +195,7 @@ public:
                 // insert x to tail of clock t2
 
                 // for the very first item in the trace, use it as the clockHand
-                if(initClockHand_t2) {
-                    initClockHand_t2 = false;
-
+                if(t2.size() ==0) {
                     t2_key.insert(t2_key.end(), k);
                     //set the page to be cold before insertion
                     value.updateFlags(value.getFlags() | COLD);
@@ -268,9 +261,7 @@ public:
                 // insert x to tail of clock t2
 
                 // for the very first item in the trace, use it as the clockHand
-                if(initClockHand_t2) {
-                    initClockHand_t2 = false;
-
+                if(t2.size() == 0) {
                     t2_key.insert(t2_key.end(), k);
                     //set the page to be cold before insertion
                     value.updateFlags(value.getFlags() | COLD);
@@ -307,6 +298,7 @@ public:
                     PRINTV(logfile << "Cache utilization: " << "** t1 size: "<< t1.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
                 }
             }
+            return (status | PAGEMISS);
         }
         return 0;
     }
@@ -320,17 +312,17 @@ public:
             // delete from t1
             if( t1.size() >= (unsigned int)max(1,p) ) {
                 //iterate clock list to find clockHand_t1
-                typename key_tracker_type::iterator it_list_clock = t1_key.begin();
-                for(; it_list_clock != t1_key.end(); it_list_clock++) {
-                    if(*it_list_clock == clockHand_t1) {
+                typename key_tracker_type::iterator it_clock_t1 = t1_key.begin();
+                for(; it_clock_t1 != t1_key.end(); it_clock_t1++) {
+                    if(*it_clock_t1 == clockHand_t1) {
                         PRINTV(logfile << "found clockHand_t1 " << clockHand_t1 << endl;);
                         break;
                     }
                 }
-                assert(it_list_clock != t1_key.end());
+                assert(it_clock_t1 != t1_key.end());
                 assert(!t1_key.empty());
 
-                typename key_to_value_type::iterator it_clock = t1.find(*it_list_clock);
+                typename key_to_value_type::iterator it_clock = t1.find(*it_clock_t1);
 
                 //the current page is a cold page
                 if(it_clock->second.getFlags() & COLD) {
@@ -338,77 +330,90 @@ public:
 
                     //keep a note what the clockHand_t1 should be for next eviciton
                     //clockHand_t1 should be the next item in the clock list
-                    if(++it_list_clock == t1_key.end()) {
+                    if(++it_clock_t1 == t1_key.end()) {
                         clockHand_t1 = *(t1_key.begin());
                         PRINTV(logfile <<__LINE__ << "clockHand_t1 " << clockHand_t1 << endl;);
                     }
                     else {
-                        clockHand_t1 = *it_list_clock;
+                        clockHand_t1 = *it_clock_t1;
                         PRINTV(logfile <<__LINE__ << "clockHand_t1 " << clockHand_t1 << endl;);
                     }
-                    //since it_list_clock++ before
-                    it_list_clock--;
+                    //since it_clock_t1++ before
+                    it_clock_t1--;
 
                     //insert the page to MRU of b1
-                    typename key_tracker_type::iterator itNew = b1_key.insert(b1_key.end(), *it_list_clock);
-                    const V v_tmp = _fn(*it_list_clock, it_clock->second);
-                    b1.insert(make_pair(*it_list_clock, v_tmp));
-                    PRINTV(logfile << "REPLACE insert key to MRU of b1: " << *it_list_clock << endl;);
+                    typename key_tracker_type::iterator itNew = b1_key.insert(b1_key.end(), *it_clock_t1);
+                    const V v_tmp = _fn(*it_clock_t1, it_clock->second);
+                    b1.insert(make_pair(*it_clock_t1, v_tmp));
+                    PRINTV(logfile << "REPLACE insert key to MRU of b1: " << *it_clock_t1 << endl;);
                     PRINTV(logfile << "Cache utilization: " << "** t1 size: "<< t1.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
 
                     //start of eviction
                     PRINTV(logfile << "evict a cold page from t1 " << it_clock->first << endl;);
                     t1.erase(it_clock);
-                    t1_key.remove(*it_list_clock);
+                    t1_key.remove(*it_clock_t1);
+                    PRINTV(logfile << "Cache utilization: " << "** t1 size: "<< t1.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
                 }
                 //the current page is a hot page
                 else {
+                    //keep a note what the clockHand_t1 should be for next eviciton
+                    //clockHand_t1 should be the next item in the clock list
+                    if(++it_clock_t1 == t1_key.end()) {
+                        clockHand_t1 = *(t1_key.begin());
+                        PRINTV(logfile <<__LINE__ << "clockHand_t1 " << clockHand_t1 << endl;);
+                    }
+                    else {
+                        clockHand_t1 = *it_clock_t1;
+                        PRINTV(logfile <<__LINE__ << "clockHand_t1 " << clockHand_t1 << endl;);
+                    }
+                    //since it_clock_t1++ before
+                    it_clock_t1--;
+
                     // insert the current page to tail of clock t2
-
                     // for the very first item in the trace, use it as the clockHand
-                    if(initClockHand_t2) {
-                        initClockHand_t2 = false;
-
-                        t2_key.insert(t2_key.end(), *it_list_clock);
+                    if(t2.size() == 0) {
+                        t2_key.insert(t2_key.end(), *it_clock_t1);
                         //set the page to be cold before insertion
                         it_clock->second.updateFlags(it_clock->second.getFlags() | COLD);
-                        const V v = _fn(*it_list_clock, it_clock->second);
-                        t2.insert(make_pair(*it_list_clock, v));
-                        PRINTV(logfile << "Insert page to clock t2: " << *it_list_clock << endl;);
+                        const V v = _fn(*it_clock_t1, it_clock->second);
+                        t2.insert(make_pair(*it_clock_t1, v));
+                        PRINTV(logfile << "Insert page to clock t2: " << *it_clock_t1 << endl;);
                         PRINTV(logfile << "Cache utilization: " << "** t1 size: "<< t1.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
 
                         //init clockHand to first cached item
-                        typename key_tracker_type::iterator it_list_clock = t2_key.begin();
-                        clockHand_t2 = *it_list_clock;
+                        typename key_tracker_type::iterator it_clock_t1 = t2_key.begin();
+                        clockHand_t2 = *it_clock_t1;
                         PRINTV(logfile <<__LINE__ << "clockHand_t2 " << clockHand_t2 << endl;);
                     }
                     //if not the very first item, clockHand is initiated already
                     else {
                         //find the clockHand from clock list
                         //and insert the new item just in front of the clockHand in clock list
-                        typename key_tracker_type::iterator it_list_clock = t2_key.begin();
-                        for(; it_list_clock != t2_key.end(); it_list_clock++) {
-                            PRINTV(logfile << "clockHand_t2 " << clockHand_t2 << " *it_list_clock " << *it_list_clock << endl;);
-                            if(*it_list_clock == clockHand_t2) {
+                        typename key_tracker_type::iterator it_clock_t2 = t2_key.begin();
+                        for(; it_clock_t2 != t2_key.end(); it_clock_t2++) {
+                            PRINTV(logfile << "clockHand_t2 " << clockHand_t2 << " *it_clock_t2 " << *it_clock_t2 << endl;);
+                            if(*it_clock_t2 == clockHand_t2) {
                                 PRINTV(logfile << "found clockHand_t2 " << clockHand_t2 << endl;);
                                 break;
                             }
                         }
-                        assert(it_list_clock != t2_key.end());
+                        assert(it_clock_t2 != t2_key.end());
                         assert(!t2_key.empty());
-                        t2_key.insert(it_list_clock, *it_list_clock);
+                        //insert the key from t1 to the clockhand of t2
+                        t2_key.insert(it_clock_t2, *it_clock_t1);
                         //set the page to be cold before insertion
                         it_clock->second.updateFlags(it_clock->second.getFlags() | COLD);
-                        const V v = _fn(*it_list_clock, it_clock->second);
-                        t2.insert(make_pair(*it_list_clock, v));
-                        PRINTV(logfile << "Insert page to clock t2: " << *it_list_clock << endl;);
+                        const V v = _fn(*it_clock_t1, it_clock->second);
+                        t2.insert(make_pair(*it_clock_t1, v));
+                        PRINTV(logfile << "Insert page to clock t2: " << *it_clock_t1 << endl;);
                         PRINTV(logfile << "Cache utilization: " << "** t1 size: "<< t1.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
                     }
 
                     //start of eviction
                     PRINTV(logfile << "evict a cold page " << it_clock->first << endl;);
                     t1.erase(it_clock);
-                    t1_key.remove(*it_list_clock);
+                    t1_key.remove(it_clock->first);
+                    PRINTV(logfile << "Cache utilization: " << "** t1 size: "<< t1.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
                 }
             }
             // t1 size < p, evict from t2 side
@@ -454,6 +459,7 @@ public:
                     PRINTV(logfile << "evict a cold page from t2 " << it_clock->first << endl;);
                     t2.erase(it_clock);
                     t2_key.remove(*it_list_clock);
+                    PRINTV(logfile << "Cache utilization: " << "** t1 size: "<< t1.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
                 }
                 //the current page is a hot page
                 else {
@@ -461,8 +467,8 @@ public:
                     it_clock->second.updateFlags(it_clock->second.getFlags() | COLD);
                     PRINTV(logfile << "Chage page of clock t2 from hot to cold: " << *it_list_clock << endl;);
                     PRINTV(logfile << "Cache utilization: " << "** t1 size: "<< t1.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
-		    
-		    //keep a note what the clockHand_t2 should be for next eviciton
+
+                    //keep a note what the clockHand_t2 should be for next eviciton
                     //clockHand_t2 should be the next item in the clock list
                     if(++it_list_clock == t2_key.end()) {
                         clockHand_t2 = *(t2_key.begin());
