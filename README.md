@@ -8,6 +8,8 @@ Done
 - CAR
 
 - WN-RD-ND
+- WN-RD-AD
+- WD-RD-ND (Revision needed)
 
 To do list
 =========
@@ -16,6 +18,4 @@ To do list
 - BPLRU
 - LB-CLOCK
 
-- WN-RD-AD
-- WD-RD-ND
 - WD-RD-AD

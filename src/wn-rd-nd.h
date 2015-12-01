@@ -71,14 +71,15 @@ public:
             ///ziqi: WNRDND Case I: read x hit in DRAM, then move x to MRU of t1
             if(status & READ) {
                 PRINTV(logfile << "Case I read hit on t1: " << k << endl;);
+
+                // preserve the hit page
+                const V v = _fn(k, it_t1->second);
+
                 t1.erase(it_t1);
                 t1_key.remove(k);
                 assert(t1.size() < DRAM_capacity);
-                const V v = _fn(k, value);
-                // Record k as most-recently-used key
+
                 t1_key.insert(t1_key.end(), k);
-                // Create the key-value entry,
-                // linked to the usage record.
                 t1.insert(make_pair(k, v));
                 PRINTV(logfile << "Case I read hit move key to MRU of t1: " << k << "** t1 size: "<< t1.size()<< ", t2 size: "<< t2.size() <<endl;);
             }
@@ -109,7 +110,7 @@ public:
                 PRINTV(logfile << "before flags: " << bitset<13>(value.getFlags()) << endl;);
                 // if the current page is cold, change it to hot
                 if(value.getFlags() & COLD) {
-                    value.updateFlags(value.getFlags() ^ COLD);
+                    value.updateFlags(value.getFlags() & ~COLD);
                 }
                 PRINTV(logfile << "after flags: " << bitset<13>(value.getFlags()) << endl;);
 
@@ -138,7 +139,7 @@ public:
                 PRINTV(logfile << "before flags: " << bitset<13>(it_t2->second.getFlags()) << endl;);
                 //if the current page is cold, change it to hot
                 if(it_t2->second.getFlags() & COLD) {
-                    it_t2->second.updateFlags(it_t2->second.getFlags() ^ COLD);
+                    it_t2->second.updateFlags(it_t2->second.getFlags() & ~COLD);
                     PRINTV(logfile << "after flags: " << bitset<13>(it_t2->second.getFlags()) << endl;);
                 }
                 // if the current page is hot, move to MRU of DRAM
@@ -177,14 +178,15 @@ public:
             //ziqi: WNRDND Case IV: write x hit in NVRAM, move to MRU of NVRAM
             else {
                 PRINTV(logfile << "Case IV write hit on NVRAM: " << k << endl;);
+
+                // preserve the hit page
+                const V v = _fn(k, it_t2->second);
+
                 t2.erase(it_t2);
                 t2_key.remove(k);
                 assert(t2.size() < (unsigned)NVM_capacity);
-                const V v = _fn(k, value);
-                // Record k as most-recently-used key
+
                 t2_key.insert(t2_key.end(), k);
-                // Create the key-value entry,
-                // linked to the usage record.
                 t2.insert(make_pair(k, v));
                 PRINTV(logfile << "Case IV write hit on NVRAM, move key to MRU of t2: " << k << "** t1 size: "<< t1.size()<< ", t2 size: "<< t2.size() <<endl;);
             }
@@ -256,11 +258,10 @@ public:
 
             return (status | PAGEMISS);
         }
-
-        ///should never reach here
+        // should never reach here
         assert(0);
         return 0;
-    } //end operator access
+    } // end operator access
 
 private:
 

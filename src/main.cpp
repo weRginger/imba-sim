@@ -18,6 +18,7 @@
 
 #include "wn-rd-nd.h"
 #include "wn-rd-ad.h"
+#include "wd-rd-nd.h"
 
 //#include "lru-wsr.h"
 //#include "darc.h"
@@ -179,6 +180,9 @@ void	Initialize(int argc, char **argv, deque<reqAtom> & memTrace)
         }
         else if(_gConfiguration.GetAlgName(i).compare("wnrdad") == 0) {
             _gTestCache[i] = new WNRDAD<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+        }
+        else if(_gConfiguration.GetAlgName(i).compare("wdrdnd") == 0) {
+            _gTestCache[i] = new WDRDND<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
         }
         /*
         else if(_gConfiguration.GetAlgName(i).compare("hybrid-dynamic") == 0) {
@@ -392,7 +396,8 @@ int main(int argc, char **argv)
             ||_gConfiguration.GetAlgName(0).compare("car") == 0
             ||_gConfiguration.GetAlgName(0).compare("lru-dram") == 0
             ||_gConfiguration.GetAlgName(0).compare("wnrdnd") == 0
-            ||_gConfiguration.GetAlgName(0).compare("wnrdad") == 0)
+            ||_gConfiguration.GetAlgName(0).compare("wnrdad") == 0
+            ||_gConfiguration.GetAlgName(0).compare("wdrdnd") == 0)
         /*
 
             ||_gConfiguration.GetAlgName(0).compare("lru-wsr") == 0
@@ -421,7 +426,8 @@ int main(int argc, char **argv)
             ||_gConfiguration.GetAlgName(0).compare("hybrid-fixed") == 0
             ||_gConfiguration.GetAlgName(0).compare("hybrid-lrulfu") == 0
             ||_gConfiguration.GetAlgName(0).compare("wnrdnd") == 0
-            ||_gConfiguration.GetAlgName(0).compare("wnrdad") == 0)
+            ||_gConfiguration.GetAlgName(0).compare("wnrdad") == 0
+            ||_gConfiguration.GetAlgName(0).compare("wdrdnd") == 0)
     {
         priceDvsN = _gConfiguration.priceDRAMvsNVM;
         moneyAllo4D = _gConfiguration.moneyAllocation4DRAM;
