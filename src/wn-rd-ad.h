@@ -66,7 +66,7 @@ public:
 
         // cache hit
         if(it_t1 != t1.end()) {
-            ///ziqi: WNRDAD Case I: read x hit in DRAM, then move x to MRU of t1 (do not care whether a copy at NVRAM)
+            // WNRDAD Case I: read x hit in DRAM, then move x to MRU of t1 (do not care whether a copy at NVRAM)
             if(status & READ) {
                 PRINTV(logfile << "Case I read hit on t1: " << k << endl;);
 
@@ -75,8 +75,8 @@ public:
 
                 t1.erase(it_t1);
                 t1_key.remove(k);
-                assert(t1.size() < DRAM_capacity);
 
+                assert(t1.size() < DRAM_capacity);
                 t1_key.insert(t1_key.end(), k);
                 t1.insert(make_pair(k, v));
                 PRINTV(logfile << "Case I read hit move key to MRU of t1: " << k << "** t1 size: "<< t1.size()<< ", t2 size: "<< t2.size() <<endl;);
@@ -122,9 +122,8 @@ public:
 
         // cache hit
         if(it_t2 != t2.end()) {
-
             // WNRDAD Case III: read hit in NVRAM, no copy at DRAM, if cold set to hot, if hot, copy to MRU of DRAM, then set to cold
-            if( (it_t1 == t1.end()) && (status & READ)) {
+            if( (it_t1 == t1.end()) && (status & READ) ) {
                 PRINTV(logfile << "Case III read hit on NVRAM: " << k << endl;);
 
                 PRINTV(logfile << "before flags: " << bitset<13>(it_t2->second.getFlags()) << endl;);

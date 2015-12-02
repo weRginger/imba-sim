@@ -19,6 +19,7 @@
 #include "wn-rd-nd.h"
 #include "wn-rd-ad.h"
 #include "wd-rd-nd.h"
+#include "wd-rd-ad.h"
 
 //#include "lru-wsr.h"
 //#include "darc.h"
@@ -184,6 +185,9 @@ void	Initialize(int argc, char **argv, deque<reqAtom> & memTrace)
         else if(_gConfiguration.GetAlgName(i).compare("wdrdnd") == 0) {
             _gTestCache[i] = new WDRDND<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
         }
+        else if(_gConfiguration.GetAlgName(i).compare("wdrdad") == 0) {
+            _gTestCache[i] = new WDRDAD<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+        }
         /*
         else if(_gConfiguration.GetAlgName(i).compare("hybrid-dynamic") == 0) {
             _gTestCache[i] = new HybridDynamic<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
@@ -203,33 +207,27 @@ void	Initialize(int argc, char **argv, deque<reqAtom> & memTrace)
         else if(_gConfiguration.GetAlgName(i).compare("iocache-threshold") == 0) {
             _gTestCache[i] = new IOCACHE_THRESHOLD<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
         }
-        */
-        ///else if(_gConfiguration.GetAlgName(i).compare("darcest") == 0) {
-        ///    _gTestCache[i] = new DARCEST<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-        ///}
-        /*
+        else if(_gConfiguration.GetAlgName(i).compare("darcest") == 0) {
+            _gTestCache[i] = new DARCEST<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+        }
         else if(_gConfiguration.GetAlgName(i).compare("cflru") == 0) {
             _gTestCache[i] = new CFLRU<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
         }
-        */
-        ///else if(_gConfiguration.GetAlgName(i).compare("blockmin") == 0) {
-        ///    _gTestCache[i] = new BlockMinCache(cacheAll, _gConfiguration.cacheSize[i], i);
-        ///}
-        /*
+        else if(_gConfiguration.GetAlgName(i).compare("blockmin") == 0) {
+            _gTestCache[i] = new BlockMinCache(cacheAll, _gConfiguration.cacheSize[i], i);
+        }
         else if(_gConfiguration.GetAlgName(i).compare("lru-wsr") == 0) {
             _gTestCache[i] = new LRUWSRCache<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
         }
-        */
-        ///else if(_gConfiguration.GetAlgName(i).compare("ziqilru") == 0) {
-        ///    _gTestCache[i] = new ZiqiLRUCache<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-        ///}
-        ///else if(_gConfiguration.GetAlgName(i).compare("dynamiclru") == 0) {
-        ///    _gTestCache[i] = new DynamicLRUCache<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-        ///}
-        ///else if(_gConfiguration.GetAlgName(i).compare("dynamicBlru") == 0) {
-        ///    _gTestCache[i] = new DynamicBLRUCache<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-        ///}
-        /*
+        else if(_gConfiguration.GetAlgName(i).compare("ziqilru") == 0) {
+            _gTestCache[i] = new ZiqiLRUCache<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+        }
+        else if(_gConfiguration.GetAlgName(i).compare("dynamiclru") == 0) {
+            _gTestCache[i] = new DynamicLRUCache<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+        }
+        else if(_gConfiguration.GetAlgName(i).compare("dynamicBlru") == 0) {
+            _gTestCache[i] = new DynamicBLRUCache<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+        }
         else if(_gConfiguration.GetAlgName(i).compare("nvm-dram") == 0) {
             _gTestCache[i] = new NVMDRAMCache<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
         }
@@ -397,7 +395,8 @@ int main(int argc, char **argv)
             ||_gConfiguration.GetAlgName(0).compare("lru-dram") == 0
             ||_gConfiguration.GetAlgName(0).compare("wnrdnd") == 0
             ||_gConfiguration.GetAlgName(0).compare("wnrdad") == 0
-            ||_gConfiguration.GetAlgName(0).compare("wdrdnd") == 0)
+            ||_gConfiguration.GetAlgName(0).compare("wdrdnd") == 0
+            ||_gConfiguration.GetAlgName(0).compare("wdrdad") == 0)
         /*
 
             ||_gConfiguration.GetAlgName(0).compare("lru-wsr") == 0
@@ -427,7 +426,8 @@ int main(int argc, char **argv)
             ||_gConfiguration.GetAlgName(0).compare("hybrid-lrulfu") == 0
             ||_gConfiguration.GetAlgName(0).compare("wnrdnd") == 0
             ||_gConfiguration.GetAlgName(0).compare("wnrdad") == 0
-            ||_gConfiguration.GetAlgName(0).compare("wdrdnd") == 0)
+            ||_gConfiguration.GetAlgName(0).compare("wdrdnd") == 0
+            ||_gConfiguration.GetAlgName(0).compare("wdrdad") == 0)
     {
         priceDvsN = _gConfiguration.priceDRAMvsNVM;
         moneyAllo4D = _gConfiguration.moneyAllocation4DRAM;
