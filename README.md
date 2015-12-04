@@ -6,10 +6,10 @@ Done
 =========
 - CLOCK
 - CAR
-
 - WN-RD-ND
 - WN-RD-AD
-- WD-RD-ND (Revision needed)
+- WD-RD-ND
+- WD-RD-AD
 
 To do list
 =========
@@ -17,5 +17,3 @@ To do list
 - FAB
 - BPLRU
 - LB-CLOCK
-
-- WD-RD-AD

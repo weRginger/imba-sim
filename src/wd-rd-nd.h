@@ -345,14 +345,13 @@ public:
                 t1.insert(make_pair(k, v));
                 PRINTV(logfile << "Case VI write miss, insert to MRU of t1: " << k << "** t1 size: "<< t1.size()<< ", t2 size: "<< t2.size() <<endl;);
             }
-
             return (status | PAGEMISS);
         }
 
-        ///should never reach here
+        // should never reach here
         assert(0);
         return 0;
-    } //end operator access
+    } // end operator access
 
 private:
 
