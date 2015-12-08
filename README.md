@@ -13,6 +13,9 @@ Done
 
 To do list
 =========
+Add write hit ratio on dirty page, read hit ratio on dirty page
+Add read hit ratio on NVRAM, read hit ratio on DRAM
+
 - LB-CAR
 - FAB
 - BPLRU
