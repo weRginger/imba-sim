@@ -167,6 +167,8 @@ public:
                 t1_key.insert(t1_key.end(), k);
                 t1.insert(make_pair(k, v));
                 PRINTV(logfile << "Case I read hit move key to MRU of t1: " << k << "** t1 size: "<< t1.size()<< ", t2 size: "<< t2.size() <<endl;);
+
+                return (status | PAGEHIT | BLKHIT);
             }
             // WDRDND Case II: write x hit in DRAM, if write bit @ DRAM is 1, then move x to MRU of t2, read bit @ NVRAM set to 1
             //                                      if write bit @ DRAM is 0, then set to 1
@@ -218,8 +220,9 @@ public:
                     t2.insert(make_pair(k, v));
                     PRINTV(logfile << "Case II write hit on t1, insert to MRU of t2: " << k << "** t1 size: "<< t1.size()<< ", t2 size: "<< t2.size() <<endl;);
                 }
+
+                return (status | PAGEHIT | BLKHIT);
             }
-            return (status | PAGEHIT | BLKHIT);
         }
 
         // cache hit
@@ -275,6 +278,8 @@ public:
                     t1.insert(make_pair(k, v));
                     PRINTV(logfile << "Case III read hit on t2, insert to MRU of t1: " << k << "** t1 size: "<< t1.size()<< ", t2 size: "<< t2.size() <<endl;);
                 }
+
+                return (status | PAGEHIT | BLKHIT);
             }
             //ziqi: WDRDND Case IV: write x hit in NVRAM, move to MRU of NVRAM
             else {
@@ -293,8 +298,9 @@ public:
                 t2_key.insert(t2_key.end(), k);
                 t2.insert(make_pair(k, v));
                 PRINTV(logfile << "Case IV write hit on NVRAM, move key to MRU of t2: " << k << "** t1 size: "<< t1.size()<< ", t2 size: "<< t2.size() <<endl;);
+
+                return (status | PAGEHIT | BLKHIT);
             }
-            return (status | PAGEHIT | BLKHIT);
         }
 
         // cache miss

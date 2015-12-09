@@ -90,6 +90,8 @@ public:
                 t1_key.insert(t1_key.end(), k);
                 t1.insert(make_pair(k, v));
                 PRINTV(logfile << "Case I read hit move key to MRU of t1: " << k << "** t1 size: "<< t1.size()<< ", t2 size: "<< t2.size() <<endl;);
+
+                return (status | PAGEHIT | BLKHIT);
             }
             //ziqi: WNRDAD Case II: write hit in DRAM (no copy at NVRAM), then copy x to MRU of t2, read bit @ NVRAM set to 0
             else if (it_t2 == t2.end()) {
@@ -128,18 +130,18 @@ public:
                 t2_key.insert(t2_key.end(), k);
                 t2.insert(make_pair(k, v));
                 PRINTV(logfile << "Case II write hit on t1, no eviction at t1, copy to MRU of t2: " << k << "** t1 size: "<< t1.size()<< ", t2 size: "<< t2.size() <<endl;);
+
+                return (status | PAGEHIT | BLKHIT);
             }
-            return (status | PAGEHIT | BLKHIT);
         }
 
         // cache hit
         if(it_t2 != t2.end()) {
             // WNRDAD Case III: read hit in NVRAM, no copy at DRAM, if cold set to hot, if hot, copy to MRU of DRAM, then set to cold
-
-            readHitOnNVRAM++;
-
             if( (it_t1 == t1.end()) && (status & READ) ) {
                 PRINTV(logfile << "Case III read hit on NVRAM: " << k << endl;);
+
+                readHitOnNVRAM++;
 
                 PRINTV(logfile << "before flags: " << bitset<13>(it_t2->second.getFlags()) << endl;);
                 // if the current page is cold, change it to hot
@@ -181,6 +183,8 @@ public:
                     it_t2->second.updateFlags(it_t2->second.getFlags() | COLD);
                     PRINTV(logfile << "after flags: " << bitset<13>(it_t2->second.getFlags()) << endl;);
                 }
+
+                return (status | PAGEHIT | BLKHIT);
             }
             //ziqi: WNRDAD Case IV: write x hit in NVRAM, move to MRU of NVRAM, if a copy in DRAM, copy to DRAM
             else {
@@ -201,9 +205,9 @@ public:
 
                 // if a copy in DRAM exists, copy it to DRAM so that the DRAM copy will be up-to-date
                 // however, for simulation, nothing needs to be done
-            }
 
-            return (status | PAGEHIT | BLKHIT);
+                return (status | PAGEHIT | BLKHIT);
+            }
         }
 
         // cache miss

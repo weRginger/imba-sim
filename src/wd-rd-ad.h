@@ -173,6 +173,8 @@ public:
                 t1_key.insert(t1_key.end(), k);
                 t1.insert(make_pair(k, v));
                 PRINTV(logfile << "Case I read hit move key to MRU of t1: " << k << "** t1 size: "<< t1.size()<< ", t2 size: "<< t2.size() <<endl;);
+
+                return (status | PAGEHIT | BLKHIT);
             }
             // WDRDAD Case II: write x hit in DRAM (no copy at NVRAM), if write bit @ DRAM is hot, then copy x to MRU of t2, write bit @ DRAM set to cold, read bit @ NVRAM set to cold
             //                                      if write cold @ DRAM, then set to hot
@@ -220,8 +222,9 @@ public:
                     t2.insert(make_pair(k, v));
                     PRINTV(logfile << "Case II write hit on t1, copied to MRU of t2: " << k << "** t1 size: "<< t1.size()<< ", t2 size: "<< t2.size() <<endl;);
                 }
+
+                return (status | PAGEHIT | BLKHIT);
             }
-            return (status | PAGEHIT | BLKHIT);
         }
 
         // cache hit
@@ -275,6 +278,8 @@ public:
                     t1.insert(make_pair(k, v));
                     PRINTV(logfile << "Case III read hit on t2, insert to MRU of t1: " << k << "** t1 size: "<< t1.size()<< ", t2 size: "<< t2.size() <<endl;);
                 }
+
+                return (status | PAGEHIT | BLKHIT);
             }
 
             //ziqi: WDRDAD Case IV: write x hit in NVRAM, move to MRU of NVRAM, if a copy at DRAM, copy to DRAM
@@ -297,8 +302,9 @@ public:
 
                 // if a copy in DRAM exists, copy it to DRAM so that the DRAM copy will be up-to-date
                 // however, for simulation, nothing needs to be done
+
+                return (status | PAGEHIT | BLKHIT);
             }
-            return (status | PAGEHIT | BLKHIT);
         }
 
         // cache miss
