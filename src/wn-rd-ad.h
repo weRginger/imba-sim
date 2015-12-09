@@ -28,6 +28,14 @@ extern double priceDvsN;
 
 extern double moneyAllo4D;
 
+extern int writeHitOnDirty;
+
+extern int writeHitOnClean;
+
+extern int readHitOnNVRAM;
+
+extern int readHitOnDRAM;
+
 template <typename K, typename V>
 class WNRDAD : public TestCache<K, V>
 {
@@ -70,6 +78,8 @@ public:
             if(status & READ) {
                 PRINTV(logfile << "Case I read hit on t1: " << k << endl;);
 
+                readHitOnDRAM++;
+
                 // preserve the hit page flags
                 const V v = _fn(k, it_t1->second);
 
@@ -84,6 +94,8 @@ public:
             //ziqi: WNRDAD Case II: write hit in DRAM (no copy at NVRAM), then copy x to MRU of t2, read bit @ NVRAM set to 0
             else if (it_t2 == t2.end()) {
                 PRINTV(logfile << "Case II write hit on t1: " << k << endl;);
+
+                writeHitOnClean++;
 
                 // no need to evict the hit page from DRAM
 
@@ -123,6 +135,9 @@ public:
         // cache hit
         if(it_t2 != t2.end()) {
             // WNRDAD Case III: read hit in NVRAM, no copy at DRAM, if cold set to hot, if hot, copy to MRU of DRAM, then set to cold
+
+            readHitOnNVRAM++;
+
             if( (it_t1 == t1.end()) && (status & READ) ) {
                 PRINTV(logfile << "Case III read hit on NVRAM: " << k << endl;);
 
@@ -170,6 +185,8 @@ public:
             //ziqi: WNRDAD Case IV: write x hit in NVRAM, move to MRU of NVRAM, if a copy in DRAM, copy to DRAM
             else {
                 PRINTV(logfile << "Case IV write hit on NVRAM: " << k << endl;);
+
+                writeHitOnDirty++;
 
                 // preserve the hit page
                 const V v = _fn(k, it_t2->second);

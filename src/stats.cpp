@@ -22,6 +22,10 @@ extern int writeHitOnDirty;
 
 extern int writeHitOnClean;
 
+extern int readHitOnNVRAM;
+
+extern int readHitOnDRAM;
+
 extern int dirtyPageInCache;
 
 void collectStat(int level, uint32_t newFlags)
@@ -204,6 +208,10 @@ void printStats()
         statStream << "Page write hit on dirty pages, " << double(writeHitOnDirty) / double(_gStats[i].Ref.getCounter()) * 100 <<"%"<<endl;
 
         statStream << "Page write hit on clean pages, " << double(writeHitOnClean) / double(_gStats[i].Ref.getCounter()) * 100 <<"%"<<endl;
+
+        statStream << "Page read hit on NVRAM, " << double(readHitOnNVRAM) / double(_gStats[i].Ref.getCounter()) * 100 <<"%"<<endl;
+
+        statStream << "Page read hit on DRAM, " << double(readHitOnDRAM) / double(_gStats[i].Ref.getCounter()) * 100 <<"%"<<endl;
 
         statStream << "Total cache hit ratio, " << (double(_gStats[i].PageReadHit.getCounter()) + double(_gStats[i].PageWriteHit.getCounter())) / double(_gStats[i].Ref.getCounter()) * 100 <<"%"<<endl;
 

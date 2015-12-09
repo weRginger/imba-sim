@@ -28,6 +28,14 @@ extern double priceDvsN;
 
 extern double moneyAllo4D;
 
+extern int writeHitOnDirty;
+
+extern int writeHitOnClean;
+
+extern int readHitOnNVRAM;
+
+extern int readHitOnDRAM;
+
 template <typename K, typename V>
 class WDRDND : public TestCache<K, V>
 {
@@ -147,6 +155,8 @@ public:
             if(status & READ) {
                 PRINTV(logfile << "Case I read hit on t1: " << k << endl;);
 
+                readHitOnDRAM++;
+
                 // preserve the hit page
                 const V v = _fn(k, it_t1->second);
 
@@ -162,6 +172,8 @@ public:
             //                                      if write bit @ DRAM is 0, then set to 1
             else {
                 PRINTV(logfile << "Case II write hit on t1: " << k << endl;);
+
+                writeHitOnClean++;
 
                 // if the current page is cold, change it to hot, mark the page to dirty
                 if(it_t1->second.getFlags() & COLD) {
@@ -218,6 +230,8 @@ public:
             if(status & READ) {
                 PRINTV(logfile << "Case III read hit on NVRAM: " << k << endl;);
 
+                readHitOnNVRAM++;
+
                 PRINTV(logfile << "before flags: " << bitset<13>(it_t2->second.getFlags()) << endl;);
                 //if the current page is cold, change it to hot
                 if(it_t2->second.getFlags() & COLD) {
@@ -265,6 +279,8 @@ public:
             //ziqi: WDRDND Case IV: write x hit in NVRAM, move to MRU of NVRAM
             else {
                 PRINTV(logfile << "Case IV write hit on NVRAM: " << k << endl;);
+
+                writeHitOnDirty++;
 
                 // preserve the hit page
                 const V v = _fn(k, it_t2->second);

@@ -64,6 +64,10 @@ int writeHitOnDirty;
 
 int writeHitOnClean;
 
+int readHitOnNVRAM;
+
+int readHitOnDRAM;
+
 int dirtyPageInCache;
 ///ziqi: set the price ratio between DRAM and NVM, e.g., 0.5 means DRAM's unit cost is half of NVM's
 double priceDvsN;
@@ -381,8 +385,12 @@ int main(int argc, char **argv)
     totalPageWriteToStorageWithPingpong = 0;
     migrationNum = 0;
     realPageAtDRAM = 0;
+
     writeHitOnDirty = 0;
     writeHitOnClean = 0;
+    readHitOnNVRAM = 0;
+    readHitOnDRAM = 0;
+
     dirtyPageInCache = 0;
     //read benchmark configuration
     Initialize(argc, argv, memTrace);

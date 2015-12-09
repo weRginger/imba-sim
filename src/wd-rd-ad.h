@@ -28,6 +28,14 @@ extern double priceDvsN;
 
 extern double moneyAllo4D;
 
+extern int writeHitOnDirty;
+
+extern int writeHitOnClean;
+
+extern int readHitOnNVRAM;
+
+extern int readHitOnDRAM;
+
 template <typename K, typename V>
 class WDRDAD : public TestCache<K, V>
 {
@@ -153,6 +161,8 @@ public:
             if(status & READ) {
                 PRINTV(logfile << "Case I read hit on t1: " << k << endl;);
 
+                readHitOnDRAM++;
+
                 // preserve the hit page
                 const V v = _fn(k, it_t1->second);
 
@@ -168,6 +178,8 @@ public:
             //                                      if write cold @ DRAM, then set to hot
             else if (it_t2 == t2.end()) {
                 PRINTV(logfile << "Case II write hit on t1, no copy at NVRAM: " << k << endl;);
+
+                writeHitOnClean++;
 
                 // if the current page is cold, change it to hot, mark the page to dirty
                 if(it_t1->second.getFlags() & COLD) {
@@ -219,6 +231,8 @@ public:
             if( (it_t1 == t1.end()) && (status & READ) ) {
                 PRINTV(logfile << "Case III read hit on NVRAM, no copy at DRAM: " << k << endl;);
 
+                readHitOnNVRAM++;
+
                 //if the current page is cold, change it to hot
                 if(it_t2->second.getFlags() & COLD) {
                     it_t2->second.updateFlags(it_t2->second.getFlags() & ~COLD);
@@ -266,6 +280,8 @@ public:
             //ziqi: WDRDAD Case IV: write x hit in NVRAM, move to MRU of NVRAM, if a copy at DRAM, copy to DRAM
             else {
                 PRINTV(logfile << "Case IV write hit on NVRAM: " << k << endl;);
+
+                writeHitOnDirty++;
 
                 // preserve the hit page
                 const V v = _fn(k, it_t2->second);
