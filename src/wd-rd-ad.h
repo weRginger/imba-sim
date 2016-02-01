@@ -24,6 +24,8 @@ using namespace std;
 
 extern int totalPageWriteToStorage;
 
+extern int totalPageWriteDueTo30sFlush;
+
 extern double priceDvsN;
 
 extern double moneyAllo4D;
@@ -129,6 +131,7 @@ public:
                         if(itSeqTemp == t1.end() || !((itSeqTemp->second.getReq().flags) & DIRTY) || itSeqTempCopyAtNVRAM != t2.end() ) {
                             // flush out
                             totalPageWriteToStorage += seqLength;
+			    totalPageWriteDueTo30sFlush += seqLength;
                             break;
                         }
                         else {

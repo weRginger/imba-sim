@@ -51,6 +51,9 @@ using namespace std;
 ///int totalEvictedCleanPages;
 
 int totalPageWriteToStorage;
+
+int totalPageWriteDueTo30sFlush;
+
 ///ziqi test the pingpong Phenomenon of hybrid-dynamic-withpcr
 int totalPageWriteToStorageWithPingpong;
 
@@ -382,6 +385,7 @@ int main(int argc, char **argv)
     ///totalSeqEvictedDirtyPages = 0;
     ///totalNonSeqEvictedDirtyPages = 0;
     totalPageWriteToStorage = 0;
+    totalPageWriteDueTo30sFlush = 0;
     totalPageWriteToStorageWithPingpong = 0;
     migrationNum = 0;
     realPageAtDRAM = 0;
