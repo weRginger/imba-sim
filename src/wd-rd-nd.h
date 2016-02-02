@@ -250,9 +250,7 @@ public:
                     // evict the hit page from NVRAM
                     t2.erase(it_t2);
                     t2_key.remove(k);
-
-                    // Note that no flush is needed right now (flush at DRAM)
-                    /* totalPageWriteToStorage++; */
+                    totalPageWriteToStorage++;
 
                     // if DRAM is full, evict the LRU page of DRAM
                     // Note that no checking whether the LRU page of DRAM is dirty or clean. The chance of the page is dirty is close to 0%
@@ -269,9 +267,9 @@ public:
                         PRINTV(logfile << "Case III read hit on t2, DRAM is full, evicting LRU page of t1: " << *itLRU << "** t1 size: "<< t1.size()<< ", t2 size: "<< t2.size() <<endl;);
                     }
 
-                    // change the hit page to hot and dirty
+                    // change the hit page to hot and clean
                     value.updateFlags(value.getFlags() & ~COLD);
-                    value.updateFlags(value.getFlags() | DIRTY);
+                    value.updateFlags(value.getFlags() & CLEAN);
 
                     // migrate the hitted page to MRU of t1
                     assert(t1.size() < DRAM_capacity);

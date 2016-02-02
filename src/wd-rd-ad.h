@@ -249,7 +249,7 @@ public:
                     // no need to evict the hit page from NVRAM
 
                     // Note that no flush is needed right now (flush at DRAM)
-                    /* totalPageWriteToStorage++; */
+                    totalPageWriteToStorage++;
 
                     // change the hit page read bit @ NVRAM to cold
                     it_t2->second.updateFlags(it_t2->second.getFlags() | COLD);
@@ -271,7 +271,7 @@ public:
 
                     // change the hit page write bit @ DRAM to cold and dirty
                     it_t2->second.updateFlags(it_t2->second.getFlags() | COLD);
-                    it_t2->second.updateFlags(it_t2->second.getFlags() | DIRTY);
+                    it_t2->second.updateFlags(it_t2->second.getFlags() & CLEAN);
 
                     // copy the hitted page to MRU of t1
                     assert(t1.size() < DRAM_capacity);
