@@ -195,8 +195,8 @@ void printStats()
         ///statStream << "Total NonSeq Evicted Dirty Pages, " << totalNonSeqEvictedDirtyPages << endl;
 
         statStream << "Total page write number to storage, " << totalPageWriteToStorage << endl;
-	
-	statStream << "Total page write number to storage due to 30s flush back, " << totalPageWriteDueTo30sFlush << endl; 
+
+        statStream << "Total page write number to storage due to 30s flush back, " << totalPageWriteDueTo30sFlush << endl;
 
         statStream << "Total page write number to storage due to ping pong, " << totalPageWriteToStorageWithPingpong << endl;
 

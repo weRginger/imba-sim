@@ -131,7 +131,7 @@ public:
                         if(itSeqTemp == t1.end() || !((itSeqTemp->second.getReq().flags) & DIRTY) || itSeqTempCopyAtNVRAM != t2.end() ) {
                             // flush out
                             totalPageWriteToStorage += seqLength;
-			    totalPageWriteDueTo30sFlush += seqLength;
+                            totalPageWriteDueTo30sFlush += seqLength;
                             break;
                         }
                         else {
@@ -316,7 +316,7 @@ public:
             if(status & READ) {
                 PRINTV(logfile << "Case V read miss: " << k << endl;);
                 // if DRAM is full, evict the LRU page of DRAM
-                // Note that no checking whether the LRU page of DRAM is dirty or clean. The chance of the page is dirty is close to 0%
+                // Checking whether the LRU page of DRAM is dirty or clean. If dirty, add to storage write number
                 if(t1.size() == DRAM_capacity) {
                     ///select the LRU page of t1
                     typename key_tracker_type::iterator itLRU = t1_key.begin();
@@ -324,7 +324,12 @@ public:
                     typename key_to_value_type::iterator it = t1.find(*itLRU);
                     assert(it != t1.end());
 
-                    ///flush back and evcit the LRU page of t1
+                    /// flush back the dirty page
+                    if(it->second.getReq().flags & DIRTY) {
+                        totalPageWriteToStorage++;
+                    }
+
+                    /// evcit the LRU page of t1
                     t1.erase(it);
                     t1_key.remove(*itLRU);
                     PRINTV(logfile << "Case V read miss, DRAM is full, evicting LRU page of t1: " << *itLRU << "** t1 size: "<< t1.size()<< ", t2 size: "<< t2.size() <<endl;);
@@ -347,7 +352,7 @@ public:
             else {
                 PRINTV(logfile << "Case VI write miss: " << k << endl;);
                 // if DRAM is full, evict the LRU page of DRAM
-                // Note that no checking whether the LRU page of DRAM is dirty or clean. The chance of the page is dirty is close to 0%
+                // Checking whether the LRU page of DRAM is dirty or clean. If dirty, add to storage write number
                 if(t1.size() == DRAM_capacity) {
                     ///select the LRU page of t1
                     typename key_tracker_type::iterator itLRU = t1_key.begin();
@@ -355,7 +360,12 @@ public:
                     typename key_to_value_type::iterator it = t1.find(*itLRU);
                     assert(it != t1.end());
 
-                    ///flush back and evcit the LRU page of t1
+                    /// flush back the dirty page
+                    if(it->second.getReq().flags & DIRTY) {
+                        totalPageWriteToStorage++;
+                    }
+
+                    /// evcit the LRU page of t1
                     t1.erase(it);
                     t1_key.remove(*itLRU);
                     PRINTV(logfile << "Case VI write miss, DRAM is full, evicting LRU page of t1: " << *itLRU << "** t1 size: "<< t1.size()<< ", t2 size: "<< t2.size() <<endl;);
