@@ -1,7 +1,7 @@
-wnrdnd-p1-m0.5-c1k-wdev_0-12_9_15.stat
-wnrdnd-p1-m0.5-c2k-wdev_0-12_9_15.stat
-wnrdnd-p1-m0.5-c4k-wdev_0-12_9_15.stat
-wnrdnd-p1-m0.5-c8k-wdev_0-12_9_15.stat
-wnrdnd-p1-m0.5-c16k-wdev_0-12_9_15.stat
-wnrdnd-p1-m0.5-c32k-wdev_0-12_9_15.stat
-wnrdnd-p1-m0.5-c64k-wdev_0-12_9_15.stat
+wnrdnd-p1-m0.5-c1k-fio_zipf.stat
+wnrdnd-p1-m0.5-c2k-fio_zipf.stat
+wnrdnd-p1-m0.5-c4k-fio_zipf.stat
+wnrdnd-p1-m0.5-c8k-fio_zipf.stat
+wnrdnd-p1-m0.5-c16k-fio_zipf.stat
+wnrdnd-p1-m0.5-c32k-fio_zipf.stat
+wnrdnd-p1-m0.5-c64k-fio_zipf.stat
