@@ -24,6 +24,8 @@ using namespace std;
 
 extern int totalPageWriteToStorage;
 
+extern int nvramSize;
+
 extern double priceDvsN;
 
 extern double moneyAllo4D;
@@ -52,17 +54,12 @@ public:
     }
 
     uint32_t access(const K &k  , V &value, uint32_t status) {
-        size_t DRAM_capacity = (size_t)_capacity * moneyAllo4D;
-        int NVM_capacity = (int)_capacity * (1 - moneyAllo4D) * priceDvsN;
-
-        ///Delete this if priceDvsN is not equal to 1.0
-        if(DRAM_capacity + NVM_capacity < _capacity) {
-            NVM_capacity = _capacity - DRAM_capacity;
-        }
+        size_t DRAM_capacity = (size_t)_capacity;
+        int NVM_capacity = nvramSize;
 
         PRINTV(logfile << endl;);
 
-        assert((t1.size() + t2.size()) <= _capacity);
+        assert((t1.size() + t2.size()) <= ((unsigned)NVM_capacity+DRAM_capacity) );
         assert(t2.size() <= (unsigned)NVM_capacity);
         assert(t1.size() <= DRAM_capacity);
         assert(_capacity != 0);

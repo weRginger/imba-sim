@@ -130,6 +130,22 @@ bool Configuration::read(int argc, char **argv)
             seqThreshold = (int) myString2intConverter(tempStr);
         }
 
+
+        ///ziqi: read out the value for NvramSize
+        try {
+            tempStr = pTree.get<std::string>("Global.nvramSize");
+        }
+        catch(...) {
+            //no log file specified
+            tempStr.clear();
+        }
+
+        if(! tempStr.empty()) {
+            NvramSize = (int) myString2intConverter(tempStr);
+        }
+
+
+
         ///ziqi: read out the value for priceDRAMvsNVM
         try {
             tempStr = pTree.get<std::string>("Global.priceDRAMvsNVM");
@@ -157,10 +173,12 @@ bool Configuration::read(int argc, char **argv)
         }
 
         std::string cacheSizeInStr;
+        std::string cacheNvramSizeInStr;
         for(int i = 0; i < totalLevels ; ++i) {
             tempStr = pTree.get<std::string>	(std::string(cacheStr[i] + "." + "size"));
             cacheSizeInStr = tempStr;
             cacheSize[i] = myString2intConverter(tempStr);
+
             tempStr = pTree.get<std::string>	(std::string(cacheStr[i] + "." + "pageSize"));
             cachePageSize[i] = myString2intConverter(tempStr);
             tempStr = pTree.get<std::string>	(std::string(cacheStr[i] + "." + "blkSize"));
@@ -200,7 +218,7 @@ bool Configuration::read(int argc, char **argv)
                 int lastSlash = traceNameStringType.find_last_of('/');
                 int lastDot = traceNameStringType.find_last_of('.');
                 //std::cout<<"lastSlash "<<lastSlash<<" lastDot "<<lastDot<<std::endl;
-                diskSimInputTraceName = tempStr+"-Policy_"+policyName[i]+"-cacheSize_"+cacheSizeInStr+"-Trace_"+traceNameStringType.substr(lastSlash+1,lastDot-lastSlash-1)+".trace";
+                diskSimInputTraceName = tempStr+"-Policy_"+policyName[i]+"-cacheSize_"+cacheSizeInStr+"-cacheNvramSize_"+cacheNvramSizeInStr+"-Trace_"+traceNameStringType.substr(lastSlash+1,lastDot-lastSlash-1)+".trace";
                 diskSimInputStream.open((diskSimInputTraceName).c_str(), std::ios::trunc);
             }
             ///end here
@@ -220,7 +238,7 @@ bool Configuration::read(int argc, char **argv)
                 int lastSlash = traceNameStringType.find_last_of('/');
                 int lastDot = traceNameStringType.find_last_of('.');
                 //std::cout<<"lastSlash "<<lastSlash<<" lastDot "<<lastDot<<std::endl;
-                afterCacheTraceName = tempStr+"-Policy_"+policyName[i]+"-cacheSize_"+cacheSizeInStr+"-Trace_"+traceNameStringType.substr(lastSlash+1,lastDot-lastSlash-1)+".trace";
+                afterCacheTraceName = tempStr+"-Policy_"+policyName[i]+"-cacheSize_"+cacheSizeInStr+"-cacheNvramSize_"+cacheNvramSizeInStr+"-Trace_"+traceNameStringType.substr(lastSlash+1,lastDot-lastSlash-1)+".trace";
                 afterCacheTraceStream.open((afterCacheTraceName).c_str(), std::ios::trunc);
             }
             ///end here
@@ -252,7 +270,7 @@ bool Configuration::read(int argc, char **argv)
             std::string traceNameStringType = traceName;
             int lastSlash = traceNameStringType.find_last_of('/');
             int lastDot = traceNameStringType.find_last_of('.');
-            diskSimOutv += "-Policy_"+policyName[0]+"-cacheSize_"+cacheSizeInStr+"-Trace_"+traceNameStringType.substr(lastSlash+1,lastDot-lastSlash-1)+".outv";
+            diskSimOutv += "-Policy_"+policyName[0]+"-cacheSize_"+cacheSizeInStr+"-cacheNvramSize_"+cacheNvramSizeInStr+"-Trace_"+traceNameStringType.substr(lastSlash+1,lastDot-lastSlash-1)+".outv";
 
             if(cache2diskPipeFileName.empty()) {
                 std::cerr << "Error: There is no output Trace file specified in the cfg for the last level cache to feed the Disk Simulator";

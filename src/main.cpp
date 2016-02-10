@@ -72,9 +72,13 @@ int readHitOnNVRAM;
 int readHitOnDRAM;
 
 int dirtyPageInCache;
-///ziqi: set the price ratio between DRAM and NVM, e.g., 0.5 means DRAM's unit cost is half of NVM's
+
+// nvram size in number of pages
+int nvramSize;
+
+// set the price ratio between DRAM and NVM, e.g., 0.5 means DRAM's unit cost is half of NVM's
 double priceDvsN;
-///ziqi: set the money allocation ratio between DRAM and total money, e.g., 0.25 means for a fixed money M, buying DRAM uses 1/4*M  and NVM 3/4*M
+// set the money allocation ratio between DRAM and total money, e.g., 0.25 means for a fixed money M, buying DRAM uses 1/4*M  and NVM 3/4*M
 double moneyAllo4D;
 
 Configuration	_gConfiguration;
@@ -441,8 +445,9 @@ int main(int argc, char **argv)
             ||_gConfiguration.GetAlgName(0).compare("wdrdnd") == 0
             ||_gConfiguration.GetAlgName(0).compare("wdrdad") == 0)
     {
-        priceDvsN = _gConfiguration.priceDRAMvsNVM;
-        moneyAllo4D = _gConfiguration.moneyAllocation4DRAM;
+        nvramSize = _gConfiguration.NvramSize;
+        //priceDvsN = _gConfiguration.priceDRAMvsNVM;
+        //moneyAllo4D = _gConfiguration.moneyAllocation4DRAM;
     }
 
 

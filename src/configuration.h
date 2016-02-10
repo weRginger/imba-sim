@@ -53,18 +53,20 @@ public:
     std::string diskSimOutv;
     std::string cache2diskPipeFileName;
 
-    ///ziqi
     std::string diskSimInputTraceName;
     std::string afterCacheTraceName;
     std::string analysisAppExe;
     std::string analysisAppPath;
 
 
-    ///ziqi: set the threshold for length of sequential write
+    // set the threshold for length of sequential write
     int seqThreshold;
 
-    ///ziqi: set the price ratio between DRAM and NVM, e.g., 0.5 means DRAM's unit cost is half of NVM's
-    ///set the money allocation ratio between DRAM and total money, e.g., 0.25 means for a fixed money M, buying DRAM uses 1/4*M  and NVM 3/4*M
+    // nvram size in number of pages
+    int NvramSize;
+
+    // set the price ratio between DRAM and NVM, e.g., 0.5 means DRAM's unit cost is half of NVM's
+    // set the money allocation ratio between DRAM and total money, e.g., 0.25 means for a fixed money M, buying DRAM uses 1/4*M  and NVM 3/4*M
     double priceDRAMvsNVM;
     double moneyAllocation4DRAM;
 
