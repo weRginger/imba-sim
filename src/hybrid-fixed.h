@@ -112,6 +112,7 @@ public:
                     t1a.erase(it_t1a);
                     t1_key.remove(k);
                     const V v = _fn(k, value);
+                    // NVRAM is not full
                     if(t2.size()+t1b.size() < (unsigned)NVM_capacity) {
                         PRINTV(logfile << "Case II write hit on t1a, and NVRAM is not full: " << k << endl;);
                         // Record k as most-recently-used key
@@ -124,7 +125,8 @@ public:
                         t2.insert(make_pair(k, make_pair(v, itNew)));
                         PRINTV(logfile << "Case II insert dirty key to t2: " << k << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<endl;);
                     }
-                    if(t2.size()+t1b.size() == (unsigned)NVM_capacity) {
+                    // NVRAM is full
+                    else {
                         if(t2.size() == (unsigned)NVM_capacity) {
                             PRINTV(logfile << "Case II write hit on t1a, and NVRAM is full, t2.size() == NVRAM: " << k << endl;);
                             ///select the LRU page of t2

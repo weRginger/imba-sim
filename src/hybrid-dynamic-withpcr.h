@@ -176,9 +176,9 @@ public:
                     PRINTV(logfile << "Key status before change: " << bitset<14>(it_t1a->second.first.getReq().flags) << endl;);
                     it_t1a->second.first.updateFlags(it_t1a->second.first.getReq().flags | PCR);
                     PRINTV(logfile << "Key status after change: " << bitset<14>(it_t1a->second.first.getReq().flags) << endl;);
-                    ///decrease one number of the real pages at DRAM
+                    // decrease one number of the real pages at DRAM
                     realPageAtDRAM--;
-                    ///NVRAM is not full
+                    // NVRAM is not full
                     if(t2.size()+t1b.size() < (unsigned)NVM_capacity) {
                         PRINTV(logfile << "Case II Write hit on t1a, and NVRAM is not full: " << k << endl;);
                         ///insert x to MRU of t2
@@ -191,8 +191,8 @@ public:
                         t2.insert(make_pair(k, make_pair(v, itNew)));
                         PRINTV(logfile << "Case II insert dirty key to t2: " << k << "** t1a size: "<< t1a.size()<<", realPageAtDRAM size: "<<realPageAtDRAM<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
                     }
-                    ///NVRAM is full
-                    if(t2.size()+t1b.size() == (unsigned)NVM_capacity) {
+                    // NVRAM is full
+                    else {
                         ///NVRAM is filled with dirty pages
                         if(t2.size() == (unsigned)NVM_capacity) {
                             PRINTV(logfile << "Case II Write hit on t1a, and NVRAM is full, t2.size() == NVRAM: " << k << endl;);
