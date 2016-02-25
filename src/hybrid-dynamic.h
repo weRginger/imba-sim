@@ -96,6 +96,11 @@ public:
         ///ziqi: HYBRID-Dynamic Case I: x hit in t2, then move x to MRU of t2
         if(it_t2 != t2.end()) {
             PRINTV(logfile << "Case I hit on t2 with key: " << k <<endl;);
+
+            if(status & READ) {
+                readHitOnNVRAM++;
+            }
+
             t2.erase(it_t2);
             t2_key.remove(k);
             assert(t2.size() < DRAM_capacity);
@@ -209,6 +214,9 @@ public:
             else {
                 if(it_t1a != t1a.end()) {
                     PRINTV(logfile << "Case II Read hit on t1a " << k << endl;);
+
+                    readHitOnDRAM++;
+
                     t1a.erase(it_t1a);
                     t1_key.remove(k);
 
@@ -224,6 +232,9 @@ public:
                 }
                 if(it_t1b != t1b.end()) {
                     PRINTV(logfile << "Case II Read hit on t1b " << k << endl;);
+
+                    readHitOnNVRAM++;
+
                     t1b.erase(it_t1b);
                     t1_key.remove(k);
 

@@ -157,6 +157,9 @@ public:
             ///ziqi: if it is a read request, only increase frequency
             else {
                 PRINTV(logfile << "Case I read hit on t2 with key: " << k <<endl;);
+
+                readHitOnNVRAM++;
+
                 typename key_to_value_type_frequencyList::iterator itfList = fList.find(k);
                 assert(itfList != fList.end() );
                 if(itfList != fList.end()) {
@@ -263,6 +266,8 @@ public:
                 if(it_t1a != t1a.end()) {
                     PRINTV(logfile << "Case II Read hit on t1a " << k << endl;);
 
+                    readHitOnDRAM++;
+
                     ///increase frequency by 1
                     typename key_to_value_type_frequencyList::iterator itfList = fList.find(k);
                     assert(itfList != fList.end() );
@@ -286,6 +291,8 @@ public:
                 }
                 if(it_t1b != t1b.end()) {
                     PRINTV(logfile << "Case II Read hit on t1b " << k << endl;);
+
+                    readHitOnNVRAM++;
 
                     ///increase frequency by 1
                     typename key_to_value_type_frequencyList::iterator itfList = fList.find(k);
