@@ -10,10 +10,10 @@
 #include "lru.h"
 #include "arc.h"
 #include "harc.h"
-#include "clock.h"
+//#include "clock.h"
+//#include "car.h"
 #include "stats.h"
 #include "min.h"
-#include "car.h"
 #include "lru-dram.h"
 
 #include "wn-rd-nd.h"
@@ -178,12 +178,6 @@ void	Initialize(int argc, char **argv, deque<reqAtom> & memTrace)
         else if(_gConfiguration.GetAlgName(i).compare("pagemin") == 0) {
             _gTestCache[i] = new PageMinCache(cacheAll, _gConfiguration.cacheSize[i], i);
         }
-        else if(_gConfiguration.GetAlgName(i).compare("clock") == 0) {
-            _gTestCache[i] = new CLOCK<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-        }
-        else if(_gConfiguration.GetAlgName(i).compare("car") == 0) {
-            _gTestCache[i] = new CAR<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-        }
         else if(_gConfiguration.GetAlgName(i).compare("lru-dram") == 0) {
             _gTestCache[i] = new LRU4DRAM<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
         }
@@ -212,37 +206,43 @@ void	Initialize(int argc, char **argv, deque<reqAtom> & memTrace)
             _gTestCache[i] = new HybridDynamicWithPCR<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
         }
         /*
-        else if(_gConfiguration.GetAlgName(i).compare("iocache") == 0) {
-            _gTestCache[i] = new IOCACHE<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-        }
-        else if(_gConfiguration.GetAlgName(i).compare("iocache-threshold") == 0) {
-            _gTestCache[i] = new IOCACHE_THRESHOLD<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-        }
-        else if(_gConfiguration.GetAlgName(i).compare("darcest") == 0) {
-            _gTestCache[i] = new DARCEST<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-        }
-        else if(_gConfiguration.GetAlgName(i).compare("cflru") == 0) {
-            _gTestCache[i] = new CFLRU<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-        }
-        else if(_gConfiguration.GetAlgName(i).compare("blockmin") == 0) {
-            _gTestCache[i] = new BlockMinCache(cacheAll, _gConfiguration.cacheSize[i], i);
-        }
-        else if(_gConfiguration.GetAlgName(i).compare("lru-wsr") == 0) {
-            _gTestCache[i] = new LRUWSRCache<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-        }
-        else if(_gConfiguration.GetAlgName(i).compare("ziqilru") == 0) {
-            _gTestCache[i] = new ZiqiLRUCache<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-        }
-        else if(_gConfiguration.GetAlgName(i).compare("dynamiclru") == 0) {
-            _gTestCache[i] = new DynamicLRUCache<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-        }
-        else if(_gConfiguration.GetAlgName(i).compare("dynamicBlru") == 0) {
-            _gTestCache[i] = new DynamicBLRUCache<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-        }
-        else if(_gConfiguration.GetAlgName(i).compare("nvm-dram") == 0) {
-            _gTestCache[i] = new NVMDRAMCache<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-        }
-        */
+        else if(_gConfiguration.GetAlgName(i).compare("clock") == 0) {
+                   _gTestCache[i] = new CLOCK<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+               }
+               else if(_gConfiguration.GetAlgName(i).compare("car") == 0) {
+                   _gTestCache[i] = new CAR<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+               }
+               else if(_gConfiguration.GetAlgName(i).compare("iocache") == 0) {
+                   _gTestCache[i] = new IOCACHE<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+               }
+               else if(_gConfiguration.GetAlgName(i).compare("iocache-threshold") == 0) {
+                   _gTestCache[i] = new IOCACHE_THRESHOLD<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+               }
+               else if(_gConfiguration.GetAlgName(i).compare("darcest") == 0) {
+                   _gTestCache[i] = new DARCEST<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+               }
+               else if(_gConfiguration.GetAlgName(i).compare("cflru") == 0) {
+                   _gTestCache[i] = new CFLRU<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+               }
+               else if(_gConfiguration.GetAlgName(i).compare("blockmin") == 0) {
+                   _gTestCache[i] = new BlockMinCache(cacheAll, _gConfiguration.cacheSize[i], i);
+               }
+               else if(_gConfiguration.GetAlgName(i).compare("lru-wsr") == 0) {
+                   _gTestCache[i] = new LRUWSRCache<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+               }
+               else if(_gConfiguration.GetAlgName(i).compare("ziqilru") == 0) {
+                   _gTestCache[i] = new ZiqiLRUCache<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+               }
+               else if(_gConfiguration.GetAlgName(i).compare("dynamiclru") == 0) {
+                   _gTestCache[i] = new DynamicLRUCache<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+               }
+               else if(_gConfiguration.GetAlgName(i).compare("dynamicBlru") == 0) {
+                   _gTestCache[i] = new DynamicBLRUCache<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+               }
+               else if(_gConfiguration.GetAlgName(i).compare("nvm-dram") == 0) {
+                   _gTestCache[i] = new NVMDRAMCache<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+               }
+               */
         //esle if //add new policy name and dynamic allocation here
         else {
             cerr << "Error: UnKnown Algorithm name " << endl;
