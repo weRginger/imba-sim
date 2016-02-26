@@ -4,8 +4,8 @@
 #PBS -l walltime=24:00:00,nodes=1:ppn=6
 #PBS -M ziqifan16@gmail.com
 #PBS -m abe
-#PBS -q oc
-DIR=/home/dudh/ziqifan/sim-ideal
+#PBS -q lab
+DIR=/home/dudh/ziqifan/imba-sim
 TRACE=/home/dudh/ziqifan/traceFile/MSR-Cambridge
 cd $DIR
 ./sim-ideal $TRACE/wdev_0.csv hybrid-dynamic-d1k-n1k.cfg hybrid-dynamic-d1k-n1k-wdev_0 &
