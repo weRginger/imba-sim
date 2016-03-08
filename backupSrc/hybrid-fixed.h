@@ -34,6 +34,12 @@ extern double priceDvsN;
 
 extern double moneyAllo4D;
 
+extern int nvramSize;
+
+extern int readHitOnNVRAM;
+
+extern int readHitOnDRAM;
+
 // Class providing fixed-size (by number of records)
 // LRU-replacement cache of a function with signature
 // V f(K)
@@ -54,23 +60,16 @@ public:
         size_t c,
         unsigned levelMinus
     ) : _fn(f) , _capacity(c), levelMinusMinus(levelMinus)  {
-        //ARH: Commented for single level cache implementation
-        //assert ( _capacity!=0 );
     }
     // Obtain value of the cached function for k
 
     uint32_t access(const K &k  , V &value, uint32_t status) {
-        size_t DRAM_capacity = (size_t)_capacity * moneyAllo4D;
-        int NVM_capacity = (int)_capacity * (1 - moneyAllo4D) * priceDvsN;
-
-        ///Delete this if priceDvsN is not equal to 1.0
-        if(DRAM_capacity + NVM_capacity < _capacity) {
-            NVM_capacity = _capacity - DRAM_capacity;
-        }
+        size_t DRAM_capacity = (size_t)_capacity;
+        int NVM_capacity = nvramSize;
 
         PRINTV(logfile << endl;);
 
-        assert((t1a.size() + t1b.size() + t2.size()) <= _capacity);
+        assert((t1a.size() + t1b.size() + t2.size()) <= ((unsigned)NVM_capacity+DRAM_capacity) );
         assert(t2.size() <= (unsigned)NVM_capacity);
         assert(t1b.size() <= (unsigned)NVM_capacity);
         assert(t1a.size() <= DRAM_capacity);
@@ -90,9 +89,14 @@ public:
         ///ziqi: Hybrid-fixed Case I: x hit in t2, then move x to MRU of t2
         if(it_t2 != t2.end()) {
             PRINTV(logfile << "Case I hit on t2: " << k << endl;);
+
+            if(status & READ) {
+                readHitOnNVRAM++;
+            }
+
             t2.erase(it_t2);
             t2_key.remove(k);
-            assert(t2.size() < _capacity);
+            assert(t2.size() < DRAM_capacity);
             const V v = _fn(k, value);
             // Record k as most-recently-used key
             typename key_tracker_type::iterator itNew = t2_key.insert(t2_key.end(), k);
@@ -113,19 +117,21 @@ public:
                     t1a.erase(it_t1a);
                     t1_key.remove(k);
                     const V v = _fn(k, value);
+                    // NVRAM is not full
                     if(t2.size()+t1b.size() < (unsigned)NVM_capacity) {
                         PRINTV(logfile << "Case II write hit on t1a, and NVRAM is not full: " << k << endl;);
                         // Record k as most-recently-used key
                         assert(t2_key.size() < (unsigned)NVM_capacity);
                         typename key_tracker_type::iterator itNew
-                        = t2_key.insert(t2_key.end(), k);
+                            = t2_key.insert(t2_key.end(), k);
                         // Create the key-value entry,
                         // linked to the usage record.
                         assert(t2.size() < (unsigned)NVM_capacity);
                         t2.insert(make_pair(k, make_pair(v, itNew)));
                         PRINTV(logfile << "Case II insert dirty key to t2: " << k << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<endl;);
                     }
-                    if(t2.size()+t1b.size() == (unsigned)NVM_capacity) {
+                    // NVRAM is full
+                    else {
                         if(t2.size() == (unsigned)NVM_capacity) {
                             PRINTV(logfile << "Case II write hit on t1a, and NVRAM is full, t2.size() == NVRAM: " << k << endl;);
                             ///select the LRU page of t2
@@ -188,7 +194,7 @@ public:
                     const V v = _fn(k, value);
                     // Record k as most-recently-used key
                     typename key_tracker_type::iterator itNew
-                    = t2_key.insert(t2_key.end(), k);
+                        = t2_key.insert(t2_key.end(), k);
                     // Create the key-value entry,
                     // linked to the usage record.
                     assert(t2.size() < (unsigned)NVM_capacity);
@@ -200,12 +206,15 @@ public:
             else {
                 if(it_t1a != t1a.end()) {
                     PRINTV(logfile << "Case II Read hit on t1a " << k << endl;);
+
+                    readHitOnDRAM++;
+
                     t1a.erase(it_t1a);
                     t1_key.remove(k);
                     const V v = _fn(k, value);
                     // Record k as most-recently-used key
                     typename key_tracker_type::iterator itNew
-                    = t1_key.insert(t1_key.end(), k);
+                        = t1_key.insert(t1_key.end(), k);
                     // Create the key-value entry,
                     // linked to the usage record.
                     assert(t1a.size() < DRAM_capacity);
@@ -214,12 +223,15 @@ public:
                 }
                 if(it_t1b != t1b.end()) {
                     PRINTV(logfile << "Case II Read hit on t1b " << k << endl;);
+
+                    readHitOnNVRAM++;
+
                     t1b.erase(it_t1b);
                     t1_key.remove(k);
                     const V v = _fn(k, value);
                     // Record k as most-recently-used key
                     typename key_tracker_type::iterator itNew
-                    = t1_key.insert(t1_key.end(), k);
+                        = t1_key.insert(t1_key.end(), k);
                     // Create the key-value entry,
                     // linked to the usage record.
                     assert(t1b.size() + t2.size() < (unsigned)NVM_capacity);

@@ -10,33 +10,39 @@
 #include "lru.h"
 #include "arc.h"
 #include "harc.h"
-//#include "clock.h"
-//#include "car.h"
 #include "stats.h"
 #include "min.h"
 #include "lru-dram.h"
 
+#include "clock.h"
+#include "car.h"
+
+/*
+#include "hybrid-fixed.h"
+#include "hybrid-dynamic.h"
+#include "hybrid-dynamic-withpcr.h"
+#include "hybrid-lrulfu.h"
 #include "wn-rd-nd.h"
 #include "wn-rd-ad.h"
 #include "wd-rd-nd.h"
 #include "wd-rd-ad.h"
 
-//#include "lru-wsr.h"
-//#include "darc.h"
-//#include "darc2.h"
-#include "hybrid-fixed.h"
-#include "hybrid-dynamic.h"
-#include "hybrid-dynamic-withpcr.h"
-#include "hybrid-lrulfu.h"
-//#include "iocache.h"
-//#include "iocache-threshold.h"
-///#include "darcest.h"
-//#include "cflru.h"
+#include "lru_ziqi.h"
+#include "lru_dynamic.h"
+#include "lru_dynamicB.h"
+#include "nvm_dram.h"
+#include "lru-wsr.h"
+#include "darc.h"
+#include "darc2.h"
+#include "iocache.h"
+#include "iocache-threshold.h"
+#include "darcest.h"
+#include "cflru.h"
+*/
 
-///#include "lru_ziqi.h"
-///#include "lru_dynamic.h"
-///#include "lru_dynamicB.h"
-//#include "nvm_dram.h"
+
+
+
 
 using namespace std;
 
@@ -181,6 +187,13 @@ void	Initialize(int argc, char **argv, deque<reqAtom> & memTrace)
         else if(_gConfiguration.GetAlgName(i).compare("lru-dram") == 0) {
             _gTestCache[i] = new LRU4DRAM<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
         }
+        else if(_gConfiguration.GetAlgName(i).compare("clock") == 0) {
+            _gTestCache[i] = new CLOCK<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+        }
+        else if(_gConfiguration.GetAlgName(i).compare("car") == 0) {
+            _gTestCache[i] = new CAR<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+        }
+        /*
         else if(_gConfiguration.GetAlgName(i).compare("wnrdnd") == 0) {
             _gTestCache[i] = new WNRDND<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
         }
@@ -205,13 +218,6 @@ void	Initialize(int argc, char **argv, deque<reqAtom> & memTrace)
         else if(_gConfiguration.GetAlgName(i).compare("hybrid-dynamic-withpcr") == 0) {
             _gTestCache[i] = new HybridDynamicWithPCR<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
         }
-        /*
-        else if(_gConfiguration.GetAlgName(i).compare("clock") == 0) {
-                   _gTestCache[i] = new CLOCK<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-               }
-               else if(_gConfiguration.GetAlgName(i).compare("car") == 0) {
-                   _gTestCache[i] = new CAR<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-               }
                else if(_gConfiguration.GetAlgName(i).compare("iocache") == 0) {
                    _gTestCache[i] = new IOCACHE<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
                }
@@ -408,23 +414,24 @@ int main(int argc, char **argv)
             ||_gConfiguration.GetAlgName(0).compare("harc") == 0
             ||_gConfiguration.GetAlgName(0).compare("clock") == 0
             ||_gConfiguration.GetAlgName(0).compare("car") == 0
-            ||_gConfiguration.GetAlgName(0).compare("lru-dram") == 0
-            ||_gConfiguration.GetAlgName(0).compare("wnrdnd") == 0
-            ||_gConfiguration.GetAlgName(0).compare("wnrdad") == 0
-            ||_gConfiguration.GetAlgName(0).compare("wdrdnd") == 0
-            ||_gConfiguration.GetAlgName(0).compare("wdrdad") == 0
-            ||_gConfiguration.GetAlgName(0).compare("hybrid-dynamic") == 0
-            ||_gConfiguration.GetAlgName(0).compare("hybrid-dynamic-withpcr") == 0
-            ||_gConfiguration.GetAlgName(0).compare("hybrid-fixed") == 0
-            ||_gConfiguration.GetAlgName(0).compare("hybrid-lrulfu") == 0)
+            ||_gConfiguration.GetAlgName(0).compare("lru-dram") == 0)
         /*
-            ||_gConfiguration.GetAlgName(0).compare("lru-wsr") == 0
-            ||_gConfiguration.GetAlgName(0).compare("darc") == 0
-            ||_gConfiguration.GetAlgName(0).compare("cflru") == 0
-            ||_gConfiguration.GetAlgName(0).compare("nvm-dram") == 0
-            ||_gConfiguration.GetAlgName(0).compare("iocache") == 0
-            ||_gConfiguration.GetAlgName(0).compare("darc2") == 0
-            */
+        ||_gConfiguration.GetAlgName(0).compare("wnrdnd") == 0
+        ||_gConfiguration.GetAlgName(0).compare("wnrdad") == 0
+        ||_gConfiguration.GetAlgName(0).compare("wdrdnd") == 0
+        ||_gConfiguration.GetAlgName(0).compare("wdrdad") == 0
+        ||_gConfiguration.GetAlgName(0).compare("hybrid-dynamic") == 0
+        ||_gConfiguration.GetAlgName(0).compare("hybrid-dynamic-withpcr") == 0
+        ||_gConfiguration.GetAlgName(0).compare("hybrid-fixed") == 0
+        ||_gConfiguration.GetAlgName(0).compare("hybrid-lrulfu") == 0
+
+        ||_gConfiguration.GetAlgName(0).compare("lru-wsr") == 0
+        ||_gConfiguration.GetAlgName(0).compare("darc") == 0
+        ||_gConfiguration.GetAlgName(0).compare("cflru") == 0
+        ||_gConfiguration.GetAlgName(0).compare("nvm-dram") == 0
+        ||_gConfiguration.GetAlgName(0).compare("iocache") == 0
+        ||_gConfiguration.GetAlgName(0).compare("darc2") == 0
+        */
 
     {
         threshold = 1;

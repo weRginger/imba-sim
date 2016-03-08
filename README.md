@@ -6,16 +6,9 @@ Done
 =========
 - CLOCK
 - CAR
-- WN-RD-ND
-- WN-RD-AD
-- WD-RD-ND
-- WD-RD-AD
 
 To do list
 =========
-Add write hit ratio on dirty page, write hit ratio on clean page
-Add read hit ratio on NVRAM, read hit ratio on DRAM
-
 - LB-CAR
 - FAB
 - BPLRU

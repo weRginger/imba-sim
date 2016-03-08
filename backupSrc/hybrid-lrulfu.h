@@ -2,7 +2,7 @@
 // C++ Interface: hybrid-lrulfu
 //
 // Description: Cache policy for hybrid main memory using NVRAM and DRAM.
-//It can self-adjust to workload based on DARC and has a concept of PCR (Page Copy on lru list for Read) to better utilize NVRAM space for dirty pages
+// It can self-adjust to workload based on DARC and has a concept of PCR (Page Copy on lru list for Read) to better utilize NVRAM space for dirty pages
 //
 // Author: Ziqi Fan, (C) 2014
 //
@@ -35,6 +35,12 @@ extern double priceDvsN;
 
 extern double moneyAllo4D;
 
+extern int nvramSize;
+
+extern int readHitOnNVRAM;
+
+extern int readHitOnDRAM;
+
 // Class providing fixed-size (by number of records)
 // LRU-replacement cache of a function with signature
 // V f(K)
@@ -58,34 +64,28 @@ public:
         size_t c,
         unsigned levelMinus
     ) : _fn(f) , _capacity(c), levelMinusMinus(levelMinus)  {
-        //ARH: Commented for single level cache implementation
-        //assert ( _capacity!=0 );
     }
     // Obtain value of the cached function for k
 
     uint32_t access(const K &k  , V &value, uint32_t status) {
-        size_t DRAM_capacity = (size_t)_capacity * moneyAllo4D;
-        int NVM_capacity = (int)_capacity * (1 - moneyAllo4D) * priceDvsN;
+        size_t DRAM_capacity = (size_t)_capacity;
+        int NVM_capacity = nvramSize;
 
-        ///Delete this if priceDvsN is not equal to 1.0
-        if(DRAM_capacity + NVM_capacity < _capacity) {
-            NVM_capacity = _capacity - DRAM_capacity;
-        }
         PRINTV(logfile << endl;);
         ///ziqi: p denotes the length of t1 and (_capacity - p) denotes the lenght of t2
         static int p=0;
 
-        assert((t1a.size() + t1b.size() + t2.size()) <= _capacity);
-        assert((t1a.size() + t1b.size() + t2.size() + b1.size() + b2.size()) <= 2*_capacity);
+        assert((t1a.size() + t1b.size() + t2.size()) <= ((unsigned)NVM_capacity+DRAM_capacity));
+        assert((t1a.size() + t1b.size() + t2.size() + b1.size() + b2.size()) <= 2*((unsigned)NVM_capacity+DRAM_capacity));
         assert(t2.size() <= (unsigned)NVM_capacity);
         assert(t1b.size() <= (unsigned)NVM_capacity);
         assert(t1a.size() <= DRAM_capacity);
-        ///assert((t1a.size() + t1b.size() + b1.size()) <= _capacity);
-        assert((t2.size() + b2.size()) <= 2*_capacity);
+        ///assert((t1a.size() + t1b.size() + b1.size()) <= ((unsigned)NVM_capacity+DRAM_capacity));
+        assert((t2.size() + b2.size()) <= 2*((unsigned)NVM_capacity+DRAM_capacity));
         assert(_capacity != 0);
         PRINTV(logfile << "Access key: " << k << endl;);
 
-        if ((t1a.size() + t1b.size() + b1.size()) > _capacity) {
+        if ((t1a.size() + t1b.size() + b1.size()) > ((unsigned)NVM_capacity+DRAM_capacity)) {
 
             ///find the least frequency in fList
             ///store the least frequency in fList
@@ -127,7 +127,7 @@ public:
             PRINTV(logfile << "Make sure (t1a.size() + t1b.size() + b1.size()) <= _capacity evicts LFU page from b1: " << leastFrequencyKey_tmp << "++frequency: " << fList.find(leastFrequencyKey_tmp)->second << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
         }
 
-        assert((t1a.size() + t1b.size() + b1.size()) <= _capacity);
+        assert((t1a.size() + t1b.size() + b1.size()) <= ((unsigned)NVM_capacity+DRAM_capacity));
 
         // Attempt to find existing record
         const typename key_to_value_type::iterator it_t1a	= t1a.find(k);
@@ -144,7 +144,7 @@ public:
                 PRINTV(logfile << "Case I write hit on t2 with key: " << k <<endl;);
                 t2.erase(it_t2);
                 t2_key.remove(k);
-                assert(t2.size() < _capacity);
+                assert(t2.size() < ((unsigned)NVM_capacity+DRAM_capacity));
                 const V v = _fn(k, value);
                 // Record k as most-recently-used key
                 typename key_tracker_type::iterator itNew = t2_key.insert(t2_key.end(), k);
@@ -157,6 +157,9 @@ public:
             ///ziqi: if it is a read request, only increase frequency
             else {
                 PRINTV(logfile << "Case I read hit on t2 with key: " << k <<endl;);
+
+                readHitOnNVRAM++;
+
                 typename key_to_value_type_frequencyList::iterator itfList = fList.find(k);
                 assert(itfList != fList.end() );
                 if(itfList != fList.end()) {
@@ -179,7 +182,7 @@ public:
                     t1a.erase(it_t1a);
                     t1_key.remove(k);
 
-                    ///NVRAM is not full
+                    // NVRAM is not full
                     if(t2.size()+t1b.size() < (unsigned)NVM_capacity) {
                         PRINTV(logfile << "Case II Write hit on t1a, and NVRAM is not full: " << k << endl;);
                         ///insert x to MRU of t2
@@ -192,8 +195,8 @@ public:
                         t2.insert(make_pair(k, make_pair(v, itNew)));
                         PRINTV(logfile << "Case II insert dirty key to t2: " << k << "++frequency: " << fList.find(k)->second << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
                     }
-                    ///NVRAM is full
-                    if(t2.size()+t1b.size() == (unsigned)NVM_capacity) {
+                    // NVRAM is full
+                    else {
                         ///NVRAM is filled with dirty pages
                         if(t2.size() == (unsigned)NVM_capacity) {
                             PRINTV(logfile << "Case II Write hit on t1a, and NVRAM is full, t2.size() == NVRAM: "<< endl;);
@@ -217,7 +220,7 @@ public:
                             totalPageWriteToStorage++;
                         }
                         ///NVRAM is full but is not filled with dirty pages
-                        else { ///t2.size() < (unsigned)NVM_capacity
+                        else {
                             PRINTV(logfile << "Case II Write hit on t1a, and NVRAM is full, t2.size() < NVRAM: "<< endl;);
                             ///migrate a clean page from t1b to t1a
                             typename key_to_value_type::iterator it_t1b_tmp = t1b.begin();
@@ -263,6 +266,8 @@ public:
                 if(it_t1a != t1a.end()) {
                     PRINTV(logfile << "Case II Read hit on t1a " << k << endl;);
 
+                    readHitOnDRAM++;
+
                     ///increase frequency by 1
                     typename key_to_value_type_frequencyList::iterator itfList = fList.find(k);
                     assert(itfList != fList.end() );
@@ -286,6 +291,8 @@ public:
                 }
                 if(it_t1b != t1b.end()) {
                     PRINTV(logfile << "Case II Read hit on t1b " << k << endl;);
+
+                    readHitOnNVRAM++;
 
                     ///increase frequency by 1
                     typename key_to_value_type_frequencyList::iterator itfList = fList.find(k);
@@ -332,8 +339,8 @@ public:
 
             PRINTV(logfile << "ADAPTATION: p increases from " << p << " to ";);
 
-            if((p+delta) > int(_capacity))
-                p = _capacity;
+            if((p+delta) > int(((unsigned)NVM_capacity+DRAM_capacity)))
+                p = ((unsigned)NVM_capacity+DRAM_capacity);
             else
                 p = p+delta;
 
@@ -411,7 +418,7 @@ public:
                     PRINTV(logfile << "Case III insert a clean page to t1b: " << k << "++frequency: " << fList.find(k)->second << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
                 }
 
-                if(t1a.size() + t1b.size() + b1.size() > _capacity) {
+                if(t1a.size() + t1b.size() + b1.size() > ((unsigned)NVM_capacity+DRAM_capacity)) {
                     if(b1.size() > 0) {
                         ///find the least frequency in fList
                         ///store the least frequency in fList
@@ -609,7 +616,7 @@ public:
                     PRINTV(logfile << "Case IV insert key to t1b: " << k << "++frequency: " << fList.find(k)->second << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
                 }
 
-                if(t1a.size() + t1b.size() + b1.size() > _capacity) {
+                if(t1a.size() + t1b.size() + b1.size() > ((unsigned)NVM_capacity+DRAM_capacity)) {
                     if(b1.size() > 0) {
                         ///find the least frequency in fList
                         ///store the least frequency in fList
@@ -713,9 +720,9 @@ public:
         else {
             PRINTV(logfile << "Case V miss on key: " << k << endl;);
 
-            if((t1a.size() + t1b.size() + b1.size()) == _capacity) {
+            if((t1a.size() + t1b.size() + b1.size()) == ((unsigned)NVM_capacity+DRAM_capacity)) {
                 ///b1 is not empty
-                if(t1a.size() + t1b.size() < _capacity) {
+                if(t1a.size() + t1b.size() < ((unsigned)NVM_capacity+DRAM_capacity)) {
                     ///find the least frequency in fList
                     ///store the least frequency in fList
                     int leastFrequency = 9999999;
@@ -816,9 +823,9 @@ public:
                     }
                 }
             }
-            else if((t1a.size() + t1b.size() + b1.size()) < _capacity) {
-                if((t1a.size() + t1b.size() + t2.size() + b1.size() + b2.size()) >= _capacity) {
-                    if((t1a.size() + t1b.size() + t2.size() + b1.size() + b2.size()) == 2 * _capacity) {
+            else if((t1a.size() + t1b.size() + b1.size()) < ((unsigned)NVM_capacity+DRAM_capacity)) {
+                if((t1a.size() + t1b.size() + t2.size() + b1.size() + b2.size()) >= ((unsigned)NVM_capacity+DRAM_capacity)) {
+                    if((t1a.size() + t1b.size() + t2.size() + b1.size() + b2.size()) == 2 * ((unsigned)NVM_capacity+DRAM_capacity)) {
                         typename key_tracker_type::iterator itLRU = b2_key.begin();
                         assert(itLRU != b2_key.end());
                         typename key_to_value_type::iterator it = b2.find(*itLRU);
@@ -887,7 +894,7 @@ public:
                         PRINTV(logfile << "Case V insert a dirty page to t2: " << k << "++frequency: " << fList.find(k)->second<< "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
                     }
                     ///NVRAM is full but is not filled with dirty pages
-                    else { ///t2.size() < (unsigned)NVM_capacity
+                    else {
                         PRINTV(logfile << "Case V, write miss and NVRAM is full, t2.size() < NVRAM: " << k << endl;);
                         ///migrate a clean page from t1b to t1a
                         typename key_to_value_type::iterator it_t1b_tmp = t1b.begin();
@@ -955,15 +962,9 @@ public:
     ///ziqi: HYBRID-LRULFU subroutine
     void REPLACE(const K &k, const V &v, int p, uint32_t status) {
         ///REPLACE can only be triggered only if both NVRAM and DRAM are full
-        assert(t1a.size() + t1b.size() + t2.size() == _capacity);
-
-        size_t DRAM_capacity = (size_t)_capacity * moneyAllo4D;
-        int NVM_capacity = (int)_capacity * (1 - moneyAllo4D) * priceDvsN;
-
-        ///Delete this if priceDvsN is not equal to 1.0
-        if(DRAM_capacity + NVM_capacity < _capacity) {
-            NVM_capacity = _capacity - DRAM_capacity;
-        }
+        size_t DRAM_capacity = (size_t)_capacity;
+        int NVM_capacity = nvramSize;
+        assert(t1a.size() + t1b.size() + t2.size() == ((unsigned)NVM_capacity+DRAM_capacity));
 
         assert(t1a.size() == DRAM_capacity);
 
