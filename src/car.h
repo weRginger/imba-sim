@@ -68,7 +68,7 @@ public:
         const typename key_to_value_type::iterator it_b1 = b1.find(k);
         const typename key_to_value_type::iterator it_b2 = b2.find(k);
 
-        ///ziqi: CAR Case I: x hit in t1 or t2, set the page to hot
+        // CAR Case I: x hit in t1 or t2, set the page to hot
         if((it_t1 != t1.end()) || (it_t2 != t2.end())) {
             assert(!((it_t1 != t1.end()) && (it_t2 != t2.end())));
             if((it_t1 != t1.end()) && (it_t2 == t2.end())) {
@@ -105,7 +105,7 @@ public:
                 const V v = _fn(k, value);
                 REPLACE(k, v, p);
 
-                //evict LRU page from b1
+                // evict LRU page from b1
                 if( (it_b1 == b1.end() && it_b2 == b2.end()) && (t1.size() + b1.size()) == _capacity)
                 {
                     typename key_tracker_type::iterator itLRU = b1_key.begin();
@@ -115,7 +115,7 @@ public:
                     b1_key.remove(*itLRU);
                     PRINTV(logfile << "Evicting LRU page from b1 " << *itLRU <<  endl;);
                 }
-                //evict LRU page from b2
+                // evict LRU page from b2
                 else if( (t1.size() + t2.size() + b1.size() + b2.size()) == 2*_capacity && (it_b1 == b1.end() && it_b2 == b2.end()) ) {
                     typename key_tracker_type::iterator itLRU = b2_key.begin();
                     assert(itLRU != b2_key.end());
@@ -128,26 +128,26 @@ public:
 
             // b1 and b2 miss also, insert x at the tail of t1
             if( it_b1 == b1.end() && it_b2 == b2.end() ) {
-                ///insert page
-                //for the very first item in the trace, use it as the clockHand
+                // insert page
+                // for the very first item in the trace, use it as the clockHand
                 if(t1.size() == 0) {
                     t1_key.insert(t1_key.end(), k);
-                    //set the page to be cold before insertion
+                    // set the page to be cold before insertion
                     value.updateFlags(value.getFlags() | COLD);
                     const V v = _fn(k, value);
                     t1.insert(make_pair(k, v));
                     PRINTV(logfile << "First time insert page to clock t1: " << k << endl;);
                     PRINTV(logfile << "Cache utilization: " << "** t1 size: "<< t1.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
 
-                    //init clockHand to first cached item
+                    // init clockHand to first cached item
                     typename key_tracker_type::iterator it_list_clock = t1_key.begin();
                     clockHand_t1 = *it_list_clock;
                     PRINTV(logfile <<__LINE__ << "clockHand_t1 " << clockHand_t1 << endl;);
                 }
-                //if not the very first item, clockHand is initiated already
+                // if not the very first item, clockHand is initiated already
                 else {
-                    //find the clockHand from clock t1
-                    //and insert the new item just in front of the clockHand in clock t1
+                    // find the clockHand from clock t1
+                    // and insert the new item just in front of the clockHand in clock t1
                     typename key_tracker_type::iterator it_list_clock = t1_key.begin();
                     for(; it_list_clock != t1_key.end(); it_list_clock++) {
                         PRINTV(logfile << "clockHand_t1 " << clockHand_t1 << " *it_list_clock " << *it_list_clock << endl;);
@@ -159,7 +159,7 @@ public:
                     assert(it_list_clock != t1_key.end());
                     assert(!t1_key.empty());
                     t1_key.insert(it_list_clock, k);
-                    //set the page to be cold before insertion
+                    // set the page to be cold before insertion
                     value.updateFlags(value.getFlags() | COLD);
                     const V v = _fn(k, value);
                     t1.insert(make_pair(k, v));
@@ -211,8 +211,8 @@ public:
                 }
                 //if not the very first item, clockHand is initiated already
                 else {
-                    //find the clockHand from clock list
-                    //and insert the new item just in front of the clockHand in clock list
+                    // find the clockHand from clock list
+                    // and insert the new item just in front of the clockHand in clock list
                     typename key_tracker_type::iterator it_list_clock = t2_key.begin();
                     for(; it_list_clock != t2_key.end(); it_list_clock++) {
                         PRINTV(logfile << "clockHand_t2 " << clockHand_t2 << " *it_list_clock " << *it_list_clock << endl;);
@@ -224,7 +224,7 @@ public:
                     assert(it_list_clock != t2_key.end());
                     assert(!t2_key.empty());
                     t2_key.insert(it_list_clock, k);
-                    //set the page to be cold before insertion
+                    // set the page to be cold before insertion
                     value.updateFlags(value.getFlags() | COLD);
                     const V v = _fn(k, value);
                     t2.insert(make_pair(k, v));
@@ -275,10 +275,10 @@ public:
                     clockHand_t2 = *it_list_clock;
                     PRINTV(logfile <<__LINE__ << "clockHand_t2 " << clockHand_t2 << endl;);
                 }
-                //if not the very first item, clockHand is initiated already
+                // if not the very first item, clockHand is initiated already
                 else {
-                    //find the clockHand from clock list
-                    //and insert the new item just in front of the clockHand in clock list
+                    // find the clockHand from clock list
+                    // and insert the new item just in front of the clockHand in clock list
                     typename key_tracker_type::iterator it_list_clock = t2_key.begin();
                     for(; it_list_clock != t2_key.end(); it_list_clock++) {
                         PRINTV(logfile << "clockHand_t2 " << clockHand_t2 << " *it_list_clock " << *it_list_clock << endl;);
@@ -290,7 +290,7 @@ public:
                     assert(it_list_clock != t2_key.end());
                     assert(!t2_key.empty());
                     t2_key.insert(it_list_clock, k);
-                    //set the page to be cold before insertion
+                    // set the page to be cold before insertion
                     value.updateFlags(value.getFlags() | COLD);
                     const V v = _fn(k, value);
                     t2.insert(make_pair(k, v));
@@ -303,7 +303,7 @@ public:
         return 0;
     }
 
-    ///ziqi: CAR subroutine
+    // ziqi: CAR subroutine
     void REPLACE(const K &k, const V &v, int p) {
         PRINTV(logfile << "Inside REPLACE with k " << k << endl;);
         bool found = false;
@@ -311,7 +311,7 @@ public:
         while (found == false) {
             // delete from t1
             if( t1.size() >= (unsigned int)max(1,p) ) {
-                //iterate clock list to find clockHand_t1
+                // iterate clock list to find clockHand_t1
                 typename key_tracker_type::iterator it_clock_t1 = t1_key.begin();
                 for(; it_clock_t1 != t1_key.end(); it_clock_t1++) {
                     if(*it_clock_t1 == clockHand_t1) {
@@ -324,12 +324,12 @@ public:
 
                 typename key_to_value_type::iterator it_clock = t1.find(*it_clock_t1);
 
-                //the current page is a cold page
+                // the current page is a cold page
                 if(it_clock->second.getFlags() & COLD) {
                     found = true;
 
-                    //keep a note what the clockHand_t1 should be for next eviciton
-                    //clockHand_t1 should be the next item in the clock list
+                    // keep a note what the clockHand_t1 should be for next eviciton
+                    // clockHand_t1 should be the next item in the clock list
                     if(++it_clock_t1 == t1_key.end()) {
                         clockHand_t1 = *(t1_key.begin());
                         PRINTV(logfile <<__LINE__ << "clockHand_t1 " << clockHand_t1 << endl;);
@@ -338,26 +338,26 @@ public:
                         clockHand_t1 = *it_clock_t1;
                         PRINTV(logfile <<__LINE__ << "clockHand_t1 " << clockHand_t1 << endl;);
                     }
-                    //since it_clock_t1++ before
+                    // since it_clock_t1++ before
                     it_clock_t1--;
 
-                    //insert the page to MRU of b1
+                    // insert the page to MRU of b1
                     typename key_tracker_type::iterator itNew = b1_key.insert(b1_key.end(), *it_clock_t1);
                     const V v_tmp = _fn(*it_clock_t1, it_clock->second);
                     b1.insert(make_pair(*it_clock_t1, v_tmp));
                     PRINTV(logfile << "REPLACE insert key to MRU of b1: " << *it_clock_t1 << endl;);
                     PRINTV(logfile << "Cache utilization: " << "** t1 size: "<< t1.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
 
-                    //start of eviction
+                    // start of eviction
                     PRINTV(logfile << "evict a cold page from t1 " << it_clock->first << endl;);
                     t1.erase(it_clock);
                     t1_key.remove(*it_clock_t1);
                     PRINTV(logfile << "Cache utilization: " << "** t1 size: "<< t1.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
                 }
-                //the current page is a hot page
+                // the current page is a hot page
                 else {
-                    //keep a note what the clockHand_t1 should be for next eviciton
-                    //clockHand_t1 should be the next item in the clock list
+                    // keep a note what the clockHand_t1 should be for next eviciton
+                    // clockHand_t1 should be the next item in the clock list
                     if(++it_clock_t1 == t1_key.end()) {
                         clockHand_t1 = *(t1_key.begin());
                         PRINTV(logfile <<__LINE__ << "clockHand_t1 " << clockHand_t1 << endl;);
@@ -366,29 +366,29 @@ public:
                         clockHand_t1 = *it_clock_t1;
                         PRINTV(logfile <<__LINE__ << "clockHand_t1 " << clockHand_t1 << endl;);
                     }
-                    //since it_clock_t1++ before
+                    // since it_clock_t1++ before
                     it_clock_t1--;
 
                     // insert the current page to tail of clock t2
                     // for the very first item in the trace, use it as the clockHand
                     if(t2.size() == 0) {
                         t2_key.insert(t2_key.end(), *it_clock_t1);
-                        //set the page to be cold before insertion
+                        // set the page to be cold before insertion
                         it_clock->second.updateFlags(it_clock->second.getFlags() | COLD);
                         const V v = _fn(*it_clock_t1, it_clock->second);
                         t2.insert(make_pair(*it_clock_t1, v));
                         PRINTV(logfile << "Insert page to clock t2: " << *it_clock_t1 << endl;);
                         PRINTV(logfile << "Cache utilization: " << "** t1 size: "<< t1.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
 
-                        //init clockHand to first cached item
+                        // init clockHand to first cached item
                         typename key_tracker_type::iterator it_clock_t1 = t2_key.begin();
                         clockHand_t2 = *it_clock_t1;
                         PRINTV(logfile <<__LINE__ << "clockHand_t2 " << clockHand_t2 << endl;);
                     }
-                    //if not the very first item, clockHand is initiated already
+                    // if not the very first item, clockHand is initiated already
                     else {
-                        //find the clockHand from clock list
-                        //and insert the new item just in front of the clockHand in clock list
+                        // find the clockHand from clock list
+                        // and insert the new item just in front of the clockHand in clock list
                         typename key_tracker_type::iterator it_clock_t2 = t2_key.begin();
                         for(; it_clock_t2 != t2_key.end(); it_clock_t2++) {
                             PRINTV(logfile << "clockHand_t2 " << clockHand_t2 << " *it_clock_t2 " << *it_clock_t2 << endl;);
@@ -399,9 +399,9 @@ public:
                         }
                         assert(it_clock_t2 != t2_key.end());
                         assert(!t2_key.empty());
-                        //insert the key from t1 to the clockhand of t2
+                        // insert the key from t1 to the clockhand of t2
                         t2_key.insert(it_clock_t2, *it_clock_t1);
-                        //set the page to be cold before insertion
+                        // set the page to be cold before insertion
                         it_clock->second.updateFlags(it_clock->second.getFlags() | COLD);
                         const V v = _fn(*it_clock_t1, it_clock->second);
                         t2.insert(make_pair(*it_clock_t1, v));
@@ -409,7 +409,7 @@ public:
                         PRINTV(logfile << "Cache utilization: " << "** t1 size: "<< t1.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
                     }
 
-                    //start of eviction
+                    // start of eviction
                     PRINTV(logfile << "evict a cold page " << it_clock->first << endl;);
                     t1.erase(it_clock);
                     t1_key.remove(it_clock->first);
@@ -418,7 +418,7 @@ public:
             }
             // t1 size < p, evict from t2 side
             else {
-                //iterate clock list to find clockHand_t2
+                // iterate clock list to find clockHand_t2
                 typename key_tracker_type::iterator it_list_clock = t2_key.begin();
                 for(; it_list_clock != t2_key.end(); it_list_clock++) {
                     if(*it_list_clock == clockHand_t2) {
@@ -431,12 +431,12 @@ public:
 
                 typename key_to_value_type::iterator it_clock = t2.find(*it_list_clock);
 
-                //the current page is a cold page
+                // the current page is a cold page
                 if(it_clock->second.getFlags() & COLD) {
                     found = true;
 
-                    //keep a note what the clockHand_t2 should be for next eviciton
-                    //clockHand_t1 should be the next item in the clock list
+                    // keep a note what the clockHand_t2 should be for next eviciton
+                    // clockHand_t1 should be the next item in the clock list
                     if(++it_list_clock == t2_key.end()) {
                         clockHand_t2 = *(t2_key.begin());
                         PRINTV(logfile <<__LINE__ << "clockHand_t2 " << clockHand_t2 << endl;);
@@ -445,31 +445,31 @@ public:
                         clockHand_t2 = *it_list_clock;
                         PRINTV(logfile <<__LINE__ << "clockHand_t2 " << clockHand_t2 << endl;);
                     }
-                    //since it_list_clock++ before
+                    // since it_list_clock++ before
                     it_list_clock--;
 
-                    //insert the page to MRU of b2
+                    // insert the page to MRU of b2
                     typename key_tracker_type::iterator itNew = b2_key.insert(b2_key.end(), *it_list_clock);
                     const V v_tmp = _fn(*it_list_clock, it_clock->second);
                     b2.insert(make_pair(*it_list_clock, v_tmp));
                     PRINTV(logfile << "REPLACE insert key to MRU of b2: " << *it_list_clock << endl;);
                     PRINTV(logfile << "Cache utilization: " << "** t1 size: "<< t1.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
 
-                    //start of eviction
+                    // start of eviction
                     PRINTV(logfile << "evict a cold page from t2 " << it_clock->first << endl;);
                     t2.erase(it_clock);
                     t2_key.remove(*it_list_clock);
                     PRINTV(logfile << "Cache utilization: " << "** t1 size: "<< t1.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
                 }
-                //the current page is a hot page
+                // the current page is a hot page
                 else {
                     // mark the page as cold
                     it_clock->second.updateFlags(it_clock->second.getFlags() | COLD);
                     PRINTV(logfile << "Chage page of clock t2 from hot to cold: " << *it_list_clock << endl;);
                     PRINTV(logfile << "Cache utilization: " << "** t1 size: "<< t1.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
 
-                    //keep a note what the clockHand_t2 should be for next eviciton
-                    //clockHand_t2 should be the next item in the clock list
+                    // keep a note what the clockHand_t2 should be for next eviciton
+                    // clockHand_t2 should be the next item in the clock list
                     if(++it_list_clock == t2_key.end()) {
                         clockHand_t2 = *(t2_key.begin());
                         PRINTV(logfile <<__LINE__ << "clockHand_t2 " << clockHand_t2 << endl;);
@@ -478,7 +478,7 @@ public:
                         clockHand_t2 = *it_list_clock;
                         PRINTV(logfile <<__LINE__ << "clockHand_t2 " << clockHand_t2 << endl;);
                     }
-                    //since it_list_clock++ before
+                    // since it_list_clock++ before
                     it_list_clock--;
                 }
             }
