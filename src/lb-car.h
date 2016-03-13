@@ -4,7 +4,7 @@
 // Description:
 //
 //
-// Author: ARH,,, <arh@aspire-one>, (C) 2011
+// Author: Ziqi Fan fanxx234@umn.edu
 //
 // Copyright: See COPYING file that comes with this distribution
 //
@@ -45,10 +45,10 @@ public:
     LBCAR(
         V(*f)(const K & , V),
         size_t c,
+	uint32_t pb,
         unsigned levelMinus
-    ) : _fn(f) , _capacity(c), levelMinusMinus(levelMinus)  {
+    ) : _fn(f) , _capacity(c), _pagePerBlock(pb), levelMinusMinus(levelMinus)  {
     }
-
 
     uint32_t access(const K &k  , V &value, uint32_t status) {
         PRINTV(logfile << endl;);
@@ -61,6 +61,7 @@ public:
         assert((t1.size() + t2.size() + b1.size() + b2.size()) <= 2*_capacity);
         assert(_capacity != 0);
         PRINTV(logfile << "Access key: " << k << endl;);
+	PRINTV(logfile << "Page per block: " << _pagePerBlock << endl;);
 
         // Attempt to find existing record
         const typename key_to_value_type::iterator it_t1 = t1.find(k);
@@ -487,10 +488,12 @@ public:
 
 private:
 
-// The function to be cached
+    // The function to be cached
     V(*_fn)(const K & , V);
-// Maximum number of key-value pairs to be retained
+    // Maximum number of key-value pairs to be retained
     const size_t _capacity;
+    // How many pages in a SSD block
+    const uint32_t _pagePerBlock;
 
     unsigned levelMinusMinus;
 
