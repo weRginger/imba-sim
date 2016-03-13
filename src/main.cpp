@@ -16,6 +16,7 @@
 
 #include "clock.h"
 #include "car.h"
+#include "lb-car.h"
 
 /*
 #include "hybrid-fixed.h"
@@ -39,10 +40,6 @@
 #include "darcest.h"
 #include "cflru.h"
 */
-
-
-
-
 
 using namespace std;
 
@@ -193,62 +190,66 @@ void	Initialize(int argc, char **argv, deque<reqAtom> & memTrace)
         else if(_gConfiguration.GetAlgName(i).compare("car") == 0) {
             _gTestCache[i] = new CAR<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
         }
+        else if(_gConfiguration.GetAlgName(i).compare("lb-car") == 0) {
+            _gTestCache[i] = new LBCAR<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+        }
         /*
-        else if(_gConfiguration.GetAlgName(i).compare("wnrdnd") == 0) {
-            _gTestCache[i] = new WNRDND<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-        }
-        else if(_gConfiguration.GetAlgName(i).compare("wnrdad") == 0) {
-            _gTestCache[i] = new WNRDAD<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-        }
-        else if(_gConfiguration.GetAlgName(i).compare("wdrdnd") == 0) {
-            _gTestCache[i] = new WDRDND<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-        }
-        else if(_gConfiguration.GetAlgName(i).compare("wdrdad") == 0) {
-            _gTestCache[i] = new WDRDAD<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-        }
-        else if(_gConfiguration.GetAlgName(i).compare("hybrid-fixed") == 0) {
-            _gTestCache[i] = new HybridFixed<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-        }
-        else if(_gConfiguration.GetAlgName(i).compare("hybrid-dynamic") == 0) {
-            _gTestCache[i] = new HybridDynamic<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-        }
-        else if(_gConfiguration.GetAlgName(i).compare("hybrid-lrulfu") == 0) {
-            _gTestCache[i] = new HybridLRULFU<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-        }
-        else if(_gConfiguration.GetAlgName(i).compare("hybrid-dynamic-withpcr") == 0) {
-            _gTestCache[i] = new HybridDynamicWithPCR<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-        }
-               else if(_gConfiguration.GetAlgName(i).compare("iocache") == 0) {
-                   _gTestCache[i] = new IOCACHE<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-               }
-               else if(_gConfiguration.GetAlgName(i).compare("iocache-threshold") == 0) {
-                   _gTestCache[i] = new IOCACHE_THRESHOLD<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-               }
-               else if(_gConfiguration.GetAlgName(i).compare("darcest") == 0) {
-                   _gTestCache[i] = new DARCEST<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-               }
-               else if(_gConfiguration.GetAlgName(i).compare("cflru") == 0) {
-                   _gTestCache[i] = new CFLRU<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-               }
-               else if(_gConfiguration.GetAlgName(i).compare("blockmin") == 0) {
-                   _gTestCache[i] = new BlockMinCache(cacheAll, _gConfiguration.cacheSize[i], i);
-               }
-               else if(_gConfiguration.GetAlgName(i).compare("lru-wsr") == 0) {
-                   _gTestCache[i] = new LRUWSRCache<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-               }
-               else if(_gConfiguration.GetAlgName(i).compare("ziqilru") == 0) {
-                   _gTestCache[i] = new ZiqiLRUCache<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-               }
-               else if(_gConfiguration.GetAlgName(i).compare("dynamiclru") == 0) {
-                   _gTestCache[i] = new DynamicLRUCache<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-               }
-               else if(_gConfiguration.GetAlgName(i).compare("dynamicBlru") == 0) {
-                   _gTestCache[i] = new DynamicBLRUCache<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-               }
-               else if(_gConfiguration.GetAlgName(i).compare("nvm-dram") == 0) {
-                   _gTestCache[i] = new NVMDRAMCache<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-               }
-               */
+            else if(_gConfiguration.GetAlgName(i).compare("wnrdnd") == 0) {
+                _gTestCache[i] = new WNRDND<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+            }
+            else if(_gConfiguration.GetAlgName(i).compare("wnrdad") == 0) {
+                _gTestCache[i] = new WNRDAD<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+            }
+            else if(_gConfiguration.GetAlgName(i).compare("wdrdnd") == 0) {
+                _gTestCache[i] = new WDRDND<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+            }
+            else if(_gConfiguration.GetAlgName(i).compare("wdrdad") == 0) {
+                _gTestCache[i] = new WDRDAD<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+            }
+            else if(_gConfiguration.GetAlgName(i).compare("hybrid-fixed") == 0) {
+                _gTestCache[i] = new HybridFixed<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+            }
+            else if(_gConfiguration.GetAlgName(i).compare("hybrid-dynamic") == 0) {
+                _gTestCache[i] = new HybridDynamic<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+            }
+            else if(_gConfiguration.GetAlgName(i).compare("hybrid-lrulfu") == 0) {
+                _gTestCache[i] = new HybridLRULFU<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+            }
+            else if(_gConfiguration.GetAlgName(i).compare("hybrid-dynamic-withpcr") == 0) {
+                _gTestCache[i] = new HybridDynamicWithPCR<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+            }
+            else if(_gConfiguration.GetAlgName(i).compare("iocache") == 0) {
+                _gTestCache[i] = new IOCACHE<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+            }
+            else if(_gConfiguration.GetAlgName(i).compare("iocache-threshold") == 0) {
+                _gTestCache[i] = new IOCACHE_THRESHOLD<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+            }
+            else if(_gConfiguration.GetAlgName(i).compare("darcest") == 0) {
+                _gTestCache[i] = new DARCEST<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+            }
+            else if(_gConfiguration.GetAlgName(i).compare("cflru") == 0) {
+                _gTestCache[i] = new CFLRU<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+            }
+            else if(_gConfiguration.GetAlgName(i).compare("blockmin") == 0) {
+                _gTestCache[i] = new BlockMinCache(cacheAll, _gConfiguration.cacheSize[i], i);
+            }
+            else if(_gConfiguration.GetAlgName(i).compare("lru-wsr") == 0) {
+                _gTestCache[i] = new LRUWSRCache<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+            }
+            else if(_gConfiguration.GetAlgName(i).compare("ziqilru") == 0) {
+                _gTestCache[i] = new ZiqiLRUCache<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+            }
+            else if(_gConfiguration.GetAlgName(i).compare("dynamiclru") == 0) {
+                _gTestCache[i] = new DynamicLRUCache<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+            }
+            else if(_gConfiguration.GetAlgName(i).compare("dynamicBlru") == 0) {
+                _gTestCache[i] = new DynamicBLRUCache<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+            }
+            else if(_gConfiguration.GetAlgName(i).compare("nvm-dram") == 0) {
+                _gTestCache[i] = new NVMDRAMCache<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+            }
+            */
+
         //esle if //add new policy name and dynamic allocation here
         else {
             cerr << "Error: UnKnown Algorithm name " << endl;
@@ -414,6 +415,7 @@ int main(int argc, char **argv)
             ||_gConfiguration.GetAlgName(0).compare("harc") == 0
             ||_gConfiguration.GetAlgName(0).compare("clock") == 0
             ||_gConfiguration.GetAlgName(0).compare("car") == 0
+            ||_gConfiguration.GetAlgName(0).compare("lb-car") == 0
             ||_gConfiguration.GetAlgName(0).compare("lru-dram") == 0)
         /*
         ||_gConfiguration.GetAlgName(0).compare("wnrdnd") == 0
