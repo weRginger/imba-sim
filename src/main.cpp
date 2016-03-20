@@ -9,6 +9,7 @@
 #include "parser.h"
 #include "lru.h"
 #include "arc.h"
+#include "arc++.h"
 #include "harc.h"
 #include "stats.h"
 #include "min.h"
@@ -174,6 +175,9 @@ void	Initialize(int argc, char **argv, deque<reqAtom> & memTrace)
         }
         else if(_gConfiguration.GetAlgName(i).compare("arc") == 0) {
             _gTestCache[i] = new ARC<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+        }
+        else if(_gConfiguration.GetAlgName(i).compare("arc++") == 0) {
+            _gTestCache[i] = new ARCPlusPlus<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
         }
         else if(_gConfiguration.GetAlgName(i).compare("harc") == 0) {
             _gTestCache[i] = new HARC<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);

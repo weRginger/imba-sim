@@ -45,7 +45,7 @@ public:
     LBCAR(
         V(*f)(const K & , V),
         size_t c,
-	uint32_t pb,
+        uint32_t pb,
         unsigned levelMinus
     ) : _fn(f) , _capacity(c), _pagePerBlock(pb), levelMinusMinus(levelMinus)  {
     }
@@ -61,7 +61,7 @@ public:
         assert((t1.size() + t2.size() + b1.size() + b2.size()) <= 2*_capacity);
         assert(_capacity != 0);
         PRINTV(logfile << "Access key: " << k << endl;);
-	PRINTV(logfile << "Page per block: " << _pagePerBlock << endl;);
+        PRINTV(logfile << "Page per block: " << _pagePerBlock << endl;);
 
         // Attempt to find existing record
         const typename key_to_value_type::iterator it_t1 = t1.find(k);
