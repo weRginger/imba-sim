@@ -191,7 +191,7 @@ void	Initialize(int argc, char **argv, deque<reqAtom> & memTrace)
             _gTestCache[i] = new CAR<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
         }
         else if(_gConfiguration.GetAlgName(i).compare("lb-car") == 0) {
-            _gTestCache[i] = new LBCAR<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+            _gTestCache[i] = new LBCAR<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], _gConfiguration.ssd2fsblkRatio[i], i);
         }
         /*
             else if(_gConfiguration.GetAlgName(i).compare("wnrdnd") == 0) {
