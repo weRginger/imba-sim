@@ -11,6 +11,7 @@
 #include "arc.h"
 #include "arc++.h"
 #include "harc.h"
+#include "harc++.h"
 #include "stats.h"
 #include "min.h"
 #include "lru-dram.h"
@@ -181,6 +182,9 @@ void	Initialize(int argc, char **argv, deque<reqAtom> & memTrace)
         }
         else if(_gConfiguration.GetAlgName(i).compare("harc") == 0) {
             _gTestCache[i] = new HARC<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+        }
+        else if(_gConfiguration.GetAlgName(i).compare("harc++") == 0) {
+            _gTestCache[i] = new HARCPlusPlus<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
         }
         else if(_gConfiguration.GetAlgName(i).compare("pagemin") == 0) {
             _gTestCache[i] = new PageMinCache(cacheAll, _gConfiguration.cacheSize[i], i);
@@ -417,6 +421,7 @@ int main(int argc, char **argv)
     if(_gConfiguration.GetAlgName(0).compare("lru") == 0
             ||_gConfiguration.GetAlgName(0).compare("arc") == 0
             ||_gConfiguration.GetAlgName(0).compare("harc") == 0
+            ||_gConfiguration.GetAlgName(0).compare("harc++") == 0
             ||_gConfiguration.GetAlgName(0).compare("clock") == 0
             ||_gConfiguration.GetAlgName(0).compare("car") == 0
             ||_gConfiguration.GetAlgName(0).compare("lb-car") == 0
