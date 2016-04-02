@@ -90,7 +90,7 @@ public:
                 const V v = _fn(k, value);
                 // Record k as most-recently-used key
                 typename key_tracker_type::iterator itNew
-                = t2_key.insert(t2_key.end(), k);
+                    = t2_key.insert(t2_key.end(), k);
                 // Create the key-value entry,
                 // linked to the usage record.
                 t2.insert(make_pair(k, make_pair(v, itNew)));
@@ -105,7 +105,7 @@ public:
                 const V v = _fn(k, value);
                 // Record k as most-recently-used key
                 typename key_tracker_type::iterator itNew
-                = t1_key.insert(t1_key.end(), k);
+                    = t1_key.insert(t1_key.end(), k);
                 // Create the key-value entry,
                 // linked to the usage record.
                 t1.insert(make_pair(k, make_pair(v, itNew)));

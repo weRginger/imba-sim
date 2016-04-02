@@ -80,13 +80,13 @@ public:
     */
 
 
-    uint32_t access(const K &k  , V &value, uint32_t status) {      
+    uint32_t access(const K &k  , V &value, uint32_t status) {
         assert(_key_to_value.size() <= _capacity);
         assert(_capacity != 0);
         PRINTV(logfile << "Access key: " << k << endl;);
-	PRINTV(logfile << "threshold = "<<threshold<< endl;);
-	///PRINTV(DISKSIMINPUTSTREAM << "Access key: " << k << endl;);
-	///PRINTV(DISKSIMINPUTSTREAM << "on issueTime: " << value.getReq().issueTime << endl;);
+        PRINTV(logfile << "threshold = "<<threshold<< endl;);
+        ///PRINTV(DISKSIMINPUTSTREAM << "Access key: " << k << endl;);
+        ///PRINTV(DISKSIMINPUTSTREAM << "on issueTime: " << value.getReq().issueTime << endl;);
 
 ///ziqi: if request is write, mark the page status as DIRTY
         if(status & WRITE) {
@@ -129,7 +129,7 @@ public:
             const V v = _fn(k, value);
             // Record k as most-recently-used key
             typename key_tracker_type::iterator itNew
-            = _key_tracker.insert(_key_tracker.end(), k);
+                = _key_tracker.insert(_key_tracker.end(), k);
             // Create the key-value entry,
             // linked to the usage record.
             _key_to_value.insert(make_pair(k, make_pair(v, itNew)));
@@ -156,22 +156,22 @@ public:
         assert(!_key_tracker.empty());
 // Identify  key
         typename key_to_value_type::iterator it = _key_to_value.find(k);
-	assert(it != _key_to_value.end());
+        assert(it != _key_to_value.end());
 ///ziqi: DiskSim format Request_arrival_time Device_number Block_number Request_size Request_flags
 ///ziqi: Device_number is set to 1. About Request_flags, 0 is for write and 1 is for read
-	PRINTV(DISKSIMINPUTSTREAM << setfill(' ')<<left<<fixed<<setw(25)<<v.getReq().issueTime<<left<<setw(8)<<"0"<<left<<fixed<<setw(12)<<it->second.first.getReq().fsblkno<<left<<fixed<<setw(8)<<seqEvictionLength<<"0"<<endl;);	
-	
+        PRINTV(DISKSIMINPUTSTREAM << setfill(' ')<<left<<fixed<<setw(25)<<v.getReq().issueTime<<left<<setw(8)<<"0"<<left<<fixed<<setw(12)<<it->second.first.getReq().fsblkno<<left<<fixed<<setw(8)<<seqEvictionLength<<"0"<<endl;);
+
         PRINTV(logfile << "Remove value " << endl;);
-	
-        // Erase both elements to completely purge record	
-	for(int z = 0; z < seqEvictionLength; z++) {
-          PRINTV(logfile << "evicting sequential dirty key " << (k+z) <<  endl;);
-          it = _key_to_value.find(k+z);
-	  assert(it != _key_to_value.end());
-          _key_to_value.erase(it);
-	  _key_tracker.remove(k+z);
+
+        // Erase both elements to completely purge record
+        for(int z = 0; z < seqEvictionLength; z++) {
+            PRINTV(logfile << "evicting sequential dirty key " << (k+z) <<  endl;);
+            it = _key_to_value.find(k+z);
+            assert(it != _key_to_value.end());
+            _key_to_value.erase(it);
+            _key_tracker.remove(k+z);
         }
-	
+
         PRINTV(logfile << "Cache utilization: " << _key_to_value.size() <<"/"<<_capacity <<endl;);
     }
 private:
@@ -179,8 +179,8 @@ private:
 // Record a fresh key-value pair in the cache
     int insert(const K &k, const V &v, uint32_t status) {
         PRINTV(logfile << "insert key " << k  << endl;);
-        
-        
+
+
         int localStatus = 0;
 // Method is only called on cache misses
         assert(_key_to_value.find(k) == _key_to_value.end());
@@ -195,7 +195,7 @@ private:
 
 // Record k as most-recently-used key
         typename key_tracker_type::iterator it
-        = _key_tracker.insert(_key_tracker.end(), k);
+            = _key_tracker.insert(_key_tracker.end(), k);
 // Create the key-value entry,
 // linked to the usage record.
         _key_to_value.insert(make_pair(k, make_pair(v, it)));
@@ -211,7 +211,7 @@ private:
         PRINTV(logfile << "dirty page insert key " << k  << endl;);
 // Record k as most-recently-used key
         typename key_tracker_type::iterator it
-        = _dirty_page_tracker.insert(_dirty_page_tracker.end(), k);
+            = _dirty_page_tracker.insert(_dirty_page_tracker.end(), k);
 // Create the key-value entry,
 // linked to the usage record.
         _dirty_page_map.insert(make_pair(k, make_pair(v, it)));
@@ -228,7 +228,7 @@ private:
         assert(!_key_tracker.empty());
 // Identify least recently used key
         const typename key_to_value_type::iterator it
-        = _key_to_value.find(_key_tracker.front());
+            = _key_to_value.find(_key_tracker.front());
 
         if(it == _key_to_value.end())
             printf("debug");
@@ -246,7 +246,7 @@ private:
             // Erase both elements to completely purge record
             _key_to_value.erase(it);
             _key_tracker.pop_front();
-	    totalEvictedCleanPages++;
+            totalEvictedCleanPages++;
             PRINTV(logfile << "Cache utilization: " << _key_to_value.size() <<"/"<<_capacity <<endl;);
         }
 ///ziqi: if the key is dirty, check its sequential length
@@ -261,7 +261,7 @@ private:
             typename key_to_value_type::iterator itSeqTemp;
 ///ziqi: denote whether any page has been evicted. If none is evicted, evict the origianl dirty page
             bool evictSth = false;
-	    
+
 ///ziqi: on Aug 9, 2013: denote the first sequential fs block number that counting consecutive pages after the victim page
             uint64_t firstSeqFsblknoForAfter = 0;
 ///ziqi: on Aug 9, 2013: denote the first sequential fs block number that counting consecutive pages before the victim page
@@ -272,10 +272,10 @@ private:
                 //cout<<"itTracker "<<*itTracker<<endl;
                 itSeq = _key_to_value.find(*itTracker);
                 firstSeqFsblknoForAfter = *itTracker;
-		firstSeqFsblknoForBefore = *itTracker;
+                firstSeqFsblknoForBefore = *itTracker;
                 seqLength = 0;
-		
-///ziqi: on Aug 9, 2013: find the number of consecutive blocks after the victim page in LRU position    
+
+///ziqi: on Aug 9, 2013: find the number of consecutive blocks after the victim page in LRU position
                 while(true) {
                     if(itTracker == _key_tracker.end()) {
                         break;
@@ -287,8 +287,8 @@ private:
                     if((itSeq->second.first.getReq().flags) & DIRTY) {
                         itSeqTemp = _key_to_value.find(firstSeqFsblknoForAfter);
 
-///ziqi: on Aug 9, 2013: if the consecutive page is not found, or it is a clean page, 
-///the first search of the consecutive pages after the victim page is done. 
+///ziqi: on Aug 9, 2013: if the consecutive page is not found, or it is a clean page,
+///the first search of the consecutive pages after the victim page is done.
 ///Break and continue the second search of the consecutive pages before the victim page.
                         if(itSeqTemp == _key_to_value.end() || !((itSeqTemp->second.first.getReq().flags) & DIRTY)) {
                             break;
@@ -303,9 +303,9 @@ private:
                         break;
                     }
                 }
-                
-///ziqi: on Aug 9, 2013: find the number of consecutive blocks before the victim page in LRU position                   
-                firstSeqFsblknoForBefore--;    
+
+///ziqi: on Aug 9, 2013: find the number of consecutive blocks before the victim page in LRU position
+                firstSeqFsblknoForBefore--;
                 while(true) {
                     if(itTracker == _key_tracker.end()) {
                         break;
@@ -318,18 +318,18 @@ private:
 ///ziqi: if the seqLength is above the threshold, evict them all
                             if(seqLength > threshold - 1) {
 
-			      ///ziqi: if in the cache, we can find consecutive dirty pages longer than threshold, increase threshold by 1.
-			      ///ziqi: if not, cut threshold in half.
-			      threshold++;
-                              status |= SEQEVICT;
-                              evictSth = true;
-                              PRINTV(logfile << "evicting sequential dirty key length " << seqLength <<  endl;);
-                              totalSeqEvictedDirtyPages += seqLength;
-      
-                              PRINTV(logfile << "evicting sequential dirty key starting at " << (firstSeqFsblknoForBefore+1) <<  endl;);
-                              remove(firstSeqFsblknoForBefore+1, v, seqLength);
-                        
-                              PRINTV(logfile << "total sequential evicted block length " << totalSeqEvictedDirtyPages <<  endl;);
+                                ///ziqi: if in the cache, we can find consecutive dirty pages longer than threshold, increase threshold by 1.
+                                ///ziqi: if not, cut threshold in half.
+                                threshold++;
+                                status |= SEQEVICT;
+                                evictSth = true;
+                                PRINTV(logfile << "evicting sequential dirty key length " << seqLength <<  endl;);
+                                totalSeqEvictedDirtyPages += seqLength;
+
+                                PRINTV(logfile << "evicting sequential dirty key starting at " << (firstSeqFsblknoForBefore+1) <<  endl;);
+                                remove(firstSeqFsblknoForBefore+1, v, seqLength);
+
+                                PRINTV(logfile << "total sequential evicted block length " << totalSeqEvictedDirtyPages <<  endl;);
                             }
 
                             //cout<<"would break"<<endl;
@@ -353,7 +353,7 @@ private:
 
             if(!evictSth) {
 ///ziqi: changed at Jun 6 that not only evicting the original dirty page but also other dirty page that sequential to the victim page
-                
+
                 ///ziqi: if in the cache, no consecutive pages are longer than threshold, cut it in half.
                 threshold /= 2;
                 PRINTV(logfile << "found no sequential dirty key, evicting original first dirty key along with the sequential ones to it " <<  endl;);
@@ -363,26 +363,26 @@ private:
                 //cout<<"itTracker "<<*itTracker<<endl;
                 //itSeq = _key_to_value.find(*itTracker);
                 firstSeqFsblknoForAfter = *itTracker;
-		firstSeqFsblknoForBefore = *itTracker;
+                firstSeqFsblknoForBefore = *itTracker;
                 seqLength = 0;
-///ziqi: on Aug 9, 2013: find the number of consecutive blocks after the victim page in LRU position    
+///ziqi: on Aug 9, 2013: find the number of consecutive blocks after the victim page in LRU position
                 while(true) {
                     itSeqTemp = _key_to_value.find(firstSeqFsblknoForAfter);
-///ziqi: on Aug 9, 2013: if the consecutive page is not found, or it is a clean page, 
-///the first search of the consecutive pages after the victim page is done. 
+///ziqi: on Aug 9, 2013: if the consecutive page is not found, or it is a clean page,
+///the first search of the consecutive pages after the victim page is done.
 ///Break and continue the second search of the consecutive pages before the victim page.
                     if(itSeqTemp == _key_to_value.end() || !((itSeqTemp->second.first.getReq().flags) & DIRTY)) {
                         break;
                     }
- ///ziqi: find a sequential block, sequential length plus 1
+///ziqi: find a sequential block, sequential length plus 1
                     else {
                         firstSeqFsblknoForAfter++;
                         seqLength++;
                     }
                 }
-                
-///ziqi: on Aug 9, 2013: find the number of consecutive blocks before the victim page in LRU position                        
-                firstSeqFsblknoForBefore--;        
+
+///ziqi: on Aug 9, 2013: find the number of consecutive blocks before the victim page in LRU position
+                firstSeqFsblknoForBefore--;
                 while(true) {
                     itSeqTemp = _key_to_value.find(firstSeqFsblknoForBefore);
 
@@ -392,20 +392,20 @@ private:
                         PRINTV(logfile << "evicting less than threshold sequential dirty key length " << seqLength <<  endl;);
                         totalNonSeqEvictedDirtyPages += seqLength;
 
-                         PRINTV(logfile << "evicting less than threshold sequential dirty key starting at " << (firstSeqFsblknoForBefore+1) <<  endl;);
-                         remove(firstSeqFsblknoForBefore+1, v, seqLength);
+                        PRINTV(logfile << "evicting less than threshold sequential dirty key starting at " << (firstSeqFsblknoForBefore+1) <<  endl;);
+                        remove(firstSeqFsblknoForBefore+1, v, seqLength);
 
                         PRINTV(logfile << "total non-sequential evicted block length " << totalNonSeqEvictedDirtyPages <<  endl;);
                         //cout<<"would break"<<endl;
                         break;
                     }
- ///ziqi: find a sequential block, sequential length plus 1
+///ziqi: find a sequential block, sequential length plus 1
                     else {
                         firstSeqFsblknoForBefore--;
                         seqLength++;
                     }
                 }
-                
+
 
                 //PRINTV(logfile << "Cache utilization: " << _key_to_value.size() <<"/"<<_capacity <<endl;);
                 /*

@@ -103,7 +103,7 @@ public:
                 const V v = _fn(k, value);
                 // Record k as most-recently-used key
                 typename key_tracker_type::iterator itNew
-                = D_2i_key.insert(D_2i_key.end(), k);
+                    = D_2i_key.insert(D_2i_key.end(), k);
                 // Create the key-value entry,
                 // linked to the usage record.
                 D_2i.insert(make_pair(k, make_pair(v, itNew)));
@@ -120,7 +120,7 @@ public:
                 const V v = _fn(k, value);
                 // Record k as most-recently-used key
                 typename key_tracker_type::iterator itNew
-                = C_2i_key.insert(C_2i_key.end(), k);
+                    = C_2i_key.insert(C_2i_key.end(), k);
                 // Create the key-value entry,
                 // linked to the usage record.
                 C_2i.insert(make_pair(k, make_pair(v, itNew)));
@@ -140,7 +140,7 @@ public:
                 const V v = _fn(k, value);
                 // Record k as most-recently-used key
                 typename key_tracker_type::iterator itNew
-                = D_2i_key.insert(D_2i_key.end(), k);
+                    = D_2i_key.insert(D_2i_key.end(), k);
                 // Create the key-value entry,
                 // linked to the usage record.
                 D_2i.insert(make_pair(k, make_pair(v, itNew)));
@@ -157,7 +157,7 @@ public:
                 const V v = _fn(k, value);
                 // Record k as most-recently-used key
                 typename key_tracker_type::iterator itNew
-                = C_2i_key.insert(C_2i_key.end(), k);
+                    = C_2i_key.insert(C_2i_key.end(), k);
                 // Create the key-value entry,
                 // linked to the usage record.
                 C_2i.insert(make_pair(k, make_pair(v, itNew)));
