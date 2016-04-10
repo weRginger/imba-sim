@@ -52,7 +52,6 @@ bool  getAndParseMSR(std::ifstream &inputTrace, reqAtom *newn)
         strcpy(line, lineString.c_str());
         ++ lineno;
 
-
         tempchar = strtok(line, " ,");
 
         std::size_t foundRead = lineString.find("Read");

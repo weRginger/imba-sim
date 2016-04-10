@@ -13,6 +13,7 @@
 #include "min.h"
 #include "lru-dram.h"
 #include "clock.h"
+#include "lb-clock.h"
 #include "car.h"
 #include "lb-car.h"
 
@@ -186,6 +187,9 @@ void	Initialize(int argc, char **argv, deque<reqAtom> & memTrace)
         }
         else if(_gConfiguration.GetAlgName(i).compare("clock") == 0) {
             _gTestCache[i] = new CLOCK<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+        }
+        else if(_gConfiguration.GetAlgName(i).compare("lb-clock") == 0) {
+            _gTestCache[i] = new LBCLOCK<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], _gConfiguration.ssd2fsblkRatio[i], i);
         }
         else if(_gConfiguration.GetAlgName(i).compare("car") == 0) {
             _gTestCache[i] = new CAR<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
@@ -414,6 +418,7 @@ int main(int argc, char **argv)
             ||_gConfiguration.GetAlgName(0).compare("arc") == 0
             ||_gConfiguration.GetAlgName(0).compare("harc") == 0
             ||_gConfiguration.GetAlgName(0).compare("clock") == 0
+            ||_gConfiguration.GetAlgName(0).compare("lb-clock") == 0
             ||_gConfiguration.GetAlgName(0).compare("car") == 0
             ||_gConfiguration.GetAlgName(0).compare("lb-car") == 0
             ||_gConfiguration.GetAlgName(0).compare("lru-dram") == 0)
