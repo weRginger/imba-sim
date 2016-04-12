@@ -7,6 +7,7 @@
 #include "configuration.h"
 #include "parser.h"
 #include "lru.h"
+#include "bplru.h"
 #include "stats.h"
 #include "clock.h"
 #include "lb-clock.h"
@@ -174,6 +175,9 @@ void	Initialize(int argc, char **argv, deque<reqAtom> & memTrace)
         if(_gConfiguration.GetAlgName(i).compare("lru") == 0) {
             _gTestCache[i] = new LRU<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
         }
+        if(_gConfiguration.GetAlgName(i).compare("bplru") == 0) {
+            _gTestCache[i] = new BPLRU<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], _gConfiguration.ssd2fsblkRatio[i], i);
+        }
         else if(_gConfiguration.GetAlgName(i).compare("clock") == 0) {
             _gTestCache[i] = new CLOCK<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
         }
@@ -199,7 +203,7 @@ void	Initialize(int argc, char **argv, deque<reqAtom> & memTrace)
             else if(_gConfiguration.GetAlgName(i).compare("wdrdad") == 0) {
                 _gTestCache[i] = new WDRDAD<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
             }
-             else if(_gConfiguration.GetAlgName(i).compare("arc") == 0) {
+            else if(_gConfiguration.GetAlgName(i).compare("arc") == 0) {
         _gTestCache[i] = new ARC<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
         }
         else if(_gConfiguration.GetAlgName(i).compare("harc") == 0) {
@@ -441,7 +445,6 @@ int main(int argc, char **argv)
         ||_gConfiguration.GetAlgName(0).compare("iocache") == 0
         ||_gConfiguration.GetAlgName(0).compare("darc2") == 0
         */
-
     {
         threshold = 1;
     }

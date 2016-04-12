@@ -7,9 +7,9 @@ Done
 - CLOCK
 - CAR
 - LB-CLOCK
+- BPLRU
 
 To do list
 =========
 - LB-CAR
 - FAB
-- BPLRU
