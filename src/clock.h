@@ -107,6 +107,7 @@ public:
                         PRINTV(logfile << "evict a cold page " << it_clock->first << endl;);
                         _key_to_value.erase(it_clock);
                         _key_tracker.remove(*it_list_clock);
+                        totalPageWriteToStorage++;
                         PRINTV(logfile << "Cache utilization: " << _key_to_value.size() <<"/"<<_capacity <<endl;);
 
                         //eviction ended

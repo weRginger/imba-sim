@@ -103,6 +103,7 @@ public:
                 }
                 if(maxLargeBlock == 0) { // all blocks are hot now
                     maxLargeBlock = large_block.begin()->first;
+                    maxNumber = large_block.begin()->second.first;
                     PRINTV(logfile << "All blocks are hot so victim block is the first block in large_block = " << maxLargeBlock << endl;);
                 }
 
@@ -118,30 +119,45 @@ public:
                 }
                 assert(evcitedPageFromBlock == maxNumber);
 
+                // clockHand will get evicted, we have to assign the next one in the CLOCK as the new clockHand
+                if(clockHand == maxLargeBlock) {
+                    if(++it_list_clock == _key_tracker.end()) {
+                        clockHand = *(_key_tracker.begin());
+                        PRINTV(logfile <<__LINE__ << endl;);
+                    }
+                    else {
+                        clockHand = *it_list_clock;
+                        PRINTV(logfile <<__LINE__ << endl;);
+                    }
+                    // since it_list_clock++ before
+                    it_list_clock--;
+
+                    PRINTV(logfile << "original clockHand is evicted, new clockHand = " << clockHand << endl;);
+                }
+
                 // evict the victim block from CLOCK and large block meta store
                 _key_tracker.remove(maxLargeBlock);
                 large_block.erase(maxLargeBlock);
 
                 totalPageWriteToStorage += evcitedPageFromBlock;
                 totalLargeBlockWriteToStorage++;
-
-                // clockHand got evicted, we have to assign the next one in the CLOCK as the new clockHand
-                if(clockHand == maxLargeBlock) {
-                    if(++it_list_clock == _key_tracker.end()) {
-                        clockHand = *(_key_tracker.begin());
-                    }
-                    else {
-                        clockHand = *it_list_clock;
-                    }
-                    // since it_list_clock++ before
-                    it_list_clock--;
-                }
                 /* eviction end here
                  */
 
                 // find the item in large block meta store with the key of clockHand
                 typename key_to_value_for_largeblock_type::iterator it_clock = large_block.find(clockHand);
                 assert(it_clock != large_block.end());
+
+                // iterate clock list to find clockHand
+                it_list_clock = _key_tracker.begin();
+                for(; it_list_clock != _key_tracker.end(); it_list_clock++) {
+                    if(*it_list_clock == clockHand) {
+                        PRINTV(logfile << "found clockHand " << clockHand << endl;);
+                        break;
+                    }
+                }
+                assert(it_list_clock != _key_tracker.end());
+                assert(!_key_tracker.empty());
 
                 // start CLOCK looping to mark cold blocks
                 while(true) {
@@ -195,6 +211,7 @@ public:
                 // update LB
                 // newly inserted LB as cold block
                 large_block.insert(make_pair(k/_pagePerBlock, make_pair(1, 0)));
+                PRINTV(logfile << "Insert large block: " << k/_pagePerBlock << endl;);
 
                 // init clockHand to first cached item
                 clockHand = k/_pagePerBlock;
@@ -238,6 +255,7 @@ public:
                 if(it_lb == large_block.end()) {
                     // not exists
                     large_block.insert(make_pair(k/_pagePerBlock, make_pair(1, 0)));
+                    PRINTV(logfile << "Insert large block: " << k/_pagePerBlock << endl;);
                 }
                 else {
                     // exists

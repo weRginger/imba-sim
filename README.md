@@ -6,10 +6,10 @@ Done
 =========
 - CLOCK
 - CAR
+- LB-CLOCK
 
 To do list
 =========
 - LB-CAR
 - FAB
 - BPLRU
-- LB-CLOCK
