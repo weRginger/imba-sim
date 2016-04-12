@@ -7,17 +7,15 @@
 #include "configuration.h"
 #include "parser.h"
 #include "lru.h"
-#include "arc.h"
-#include "harc.h"
 #include "stats.h"
-#include "min.h"
-#include "lru-dram.h"
 #include "clock.h"
 #include "lb-clock.h"
 #include "car.h"
 #include "lb-car.h"
 
 /*
+#include "arc.h"
+#include "harc.h"
 #include "harc++.h"
 #include "arc++.h"
 #include "hybrid-fixed.h"
@@ -28,7 +26,8 @@
 #include "wn-rd-ad.h"
 #include "wd-rd-nd.h"
 #include "wd-rd-ad.h"
-
+#include "min.h"
+#include "lru-dram.h"
 #include "lru_ziqi.h"
 #include "lru_dynamic.h"
 #include "lru_dynamicB.h"
@@ -55,6 +54,8 @@ using namespace std;
 ///int totalEvictedCleanPages;
 
 int totalPageWriteToStorage;
+
+int totalLargeBlockWriteToStorage;
 
 int totalPageWriteDueTo30sFlush;
 
@@ -173,18 +174,6 @@ void	Initialize(int argc, char **argv, deque<reqAtom> & memTrace)
         if(_gConfiguration.GetAlgName(i).compare("lru") == 0) {
             _gTestCache[i] = new LRU<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
         }
-        else if(_gConfiguration.GetAlgName(i).compare("arc") == 0) {
-            _gTestCache[i] = new ARC<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-        }
-        else if(_gConfiguration.GetAlgName(i).compare("harc") == 0) {
-            _gTestCache[i] = new HARC<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-        }
-        else if(_gConfiguration.GetAlgName(i).compare("pagemin") == 0) {
-            _gTestCache[i] = new PageMinCache(cacheAll, _gConfiguration.cacheSize[i], i);
-        }
-        else if(_gConfiguration.GetAlgName(i).compare("lru-dram") == 0) {
-            _gTestCache[i] = new LRU4DRAM<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-        }
         else if(_gConfiguration.GetAlgName(i).compare("clock") == 0) {
             _gTestCache[i] = new CLOCK<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
         }
@@ -210,6 +199,18 @@ void	Initialize(int argc, char **argv, deque<reqAtom> & memTrace)
             else if(_gConfiguration.GetAlgName(i).compare("wdrdad") == 0) {
                 _gTestCache[i] = new WDRDAD<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
             }
+             else if(_gConfiguration.GetAlgName(i).compare("arc") == 0) {
+        _gTestCache[i] = new ARC<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+        }
+        else if(_gConfiguration.GetAlgName(i).compare("harc") == 0) {
+        _gTestCache[i] = new HARC<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+        }
+        else if(_gConfiguration.GetAlgName(i).compare("pagemin") == 0) {
+        _gTestCache[i] = new PageMinCache(cacheAll, _gConfiguration.cacheSize[i], i);
+        }
+        else if(_gConfiguration.GetAlgName(i).compare("lru-dram") == 0) {
+        _gTestCache[i] = new LRU4DRAM<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+        }
             else if(_gConfiguration.GetAlgName(i).compare("hybrid-fixed") == 0) {
                 _gTestCache[i] = new HybridFixed<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
             }
@@ -400,6 +401,7 @@ int main(int argc, char **argv)
     ///totalSeqEvictedDirtyPages = 0;
     ///totalNonSeqEvictedDirtyPages = 0;
     totalPageWriteToStorage = 0;
+    totalLargeBlockWriteToStorage = 0;
     totalPageWriteDueTo30sFlush = 0;
     totalPageWriteToStorageWithPingpong = 0;
     migrationNum = 0;

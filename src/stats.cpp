@@ -14,6 +14,8 @@ extern StatsDS   *_gStats;
 
 extern int totalPageWriteToStorage;
 
+extern int totalLargeBlockWriteToStorage;
+
 extern int totalPageWriteDueTo30sFlush;
 
 ///ziqi test the pingpong Phenomenon of hybrid-dynamic-withpcr
@@ -196,31 +198,33 @@ void printStats()
 
         statStream << "Total page write number to storage, " << totalPageWriteToStorage << endl;
 
-        statStream << "Total page write number to storage due to 30s flush back, " << totalPageWriteDueTo30sFlush << endl;
+        statStream << "Total large block write number to storage, " << totalLargeBlockWriteToStorage << endl;
 
-        statStream << "Total page write number to storage due to ping pong, " << totalPageWriteToStorageWithPingpong << endl;
+        //statStream << "Total page write number to storage due to 30s flush back, " << totalPageWriteDueTo30sFlush << endl;
 
-        statStream << "Dirty pages in cache after trace running finished, " << dirtyPageInCache << endl;
+        //statStream << "Total page write number to storage due to ping pong, " << totalPageWriteToStorageWithPingpong << endl;
 
-        statStream << "Total write traffic (dirty page sync+dirty page in cache), " << totalPageWriteToStorage + dirtyPageInCache << endl;
+        //statStream << "Dirty pages in cache after trace running finished, " << dirtyPageInCache << endl;
 
-        ///statStream << "Total Evicted Clean Pages, " << totalEvictedCleanPages << endl;
+        //statStream << "Total write traffic (dirty page sync+dirty page in cache), " << totalPageWriteToStorage + dirtyPageInCache << endl;
+
+        //statStream << "Total Evicted Clean Pages, " << totalEvictedCleanPages << endl;
 
         statStream << "Page read cache hit ratio, " << double(_gStats[i].PageReadHit.getCounter()) / double(_gStats[i].Ref.getCounter()) * 100 <<"%"<<endl;
 
         statStream << "Page write cache hit ratio, " << double(_gStats[i].PageWriteHit.getCounter()) / double(_gStats[i].Ref.getCounter()) * 100 <<"%"<<endl;
 
-        statStream << "Page write hit on dirty pages, " << double(writeHitOnDirty) / double(_gStats[i].Ref.getCounter()) * 100 <<"%"<<endl;
+        //statStream << "Page write hit on dirty pages, " << double(writeHitOnDirty) / double(_gStats[i].Ref.getCounter()) * 100 <<"%"<<endl;
 
-        statStream << "Page write hit on clean pages, " << double(writeHitOnClean) / double(_gStats[i].Ref.getCounter()) * 100 <<"%"<<endl;
+        //statStream << "Page write hit on clean pages, " << double(writeHitOnClean) / double(_gStats[i].Ref.getCounter()) * 100 <<"%"<<endl;
 
-        statStream << "Page read hit on NVRAM, " << double(readHitOnNVRAM) / double(_gStats[i].Ref.getCounter()) * 100 <<"%"<<endl;
+        //statStream << "Page read hit on NVRAM, " << double(readHitOnNVRAM) / double(_gStats[i].Ref.getCounter()) * 100 <<"%"<<endl;
 
-        statStream << "Page read hit on DRAM, " << double(readHitOnDRAM) / double(_gStats[i].Ref.getCounter()) * 100 <<"%"<<endl;
+        //statStream << "Page read hit on DRAM, " << double(readHitOnDRAM) / double(_gStats[i].Ref.getCounter()) * 100 <<"%"<<endl;
 
         statStream << "Total cache hit ratio, " << (double(_gStats[i].PageReadHit.getCounter()) + double(_gStats[i].PageWriteHit.getCounter())) / double(_gStats[i].Ref.getCounter()) * 100 <<"%"<<endl;
 
-        statStream << "Migration Number, " << migrationNum <<endl;
+        //statStream << "Migration Number, " << migrationNum <<endl;
 
         statStream << endl;
     }
