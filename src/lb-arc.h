@@ -164,7 +164,12 @@ public:
 
             const V v = _fn(k, value);
 
-            REPLACE(k, v, p);
+            /* Different from ARC, LB-ARC sometimes could be not full even after full
+             * This is because LB-ARC might evict several pages in one shot instead of only one
+             */
+            if(t1.size() + t2.size() == _capacity) {
+                REPLACE(k, v, p);
+            }
 
             b1.erase(it_b1);
             b1_key.remove(k);
@@ -226,7 +231,12 @@ public:
 
             const V v = _fn(k, value);
 
-            REPLACE(k, v, p);
+            /* Different from ARC, LB-ARC sometimes could be not full even after full
+            * This is because LB-ARC might evict several pages in one shot instead of only one
+            */
+            if(t1.size() + t2.size() == _capacity) {
+                REPLACE(k, v, p);
+            }
 
             b2.erase(it_b2);
             b2_key.remove(k);
@@ -281,7 +291,12 @@ public:
 
                     const V v = _fn(k, value);
 
-                    REPLACE(k, v, p);
+                    /* Different from ARC, LB-ARC sometimes could be not full even after full
+                    * This is because LB-ARC might evict several pages in one shot instead of only one
+                    */
+                    if(t1.size() + t2.size() == _capacity) {
+                        REPLACE(k, v, p);
+                    }
                 }
                 // b1 is empty, evict LRU LB of t1
                 else {
@@ -324,7 +339,12 @@ public:
                     }
                     const V v = _fn(k, value);
 
-                    REPLACE(k, v, p);
+                    /* Different from ARC, LB-ARC sometimes could be not full even after full
+                    * This is because LB-ARC might evict several pages in one shot instead of only one
+                    */
+                    if(t1.size() + t2.size() == _capacity) {
+                        REPLACE(k, v, p);
+                    }
                 }
             }
 
