@@ -89,12 +89,12 @@ public:
 
                 // evict hit page from t1
                 t1.erase(it_t1);
-                t1_key.remove(k/_pagePerBlock);
                 typename key_to_value_for_largeblock_type::iterator it_t1_lb = t1_lb.find(k/_pagePerBlock);
                 assert(it_t1_lb != t1_lb.end());
                 it_t1_lb->second--;
                 if(it_t1_lb->second == 0) {
                     t1_lb.erase(k/_pagePerBlock);
+                    t1_key.remove(k/_pagePerBlock);
                 }
 
                 typename key_to_value_for_largeblock_type::iterator it_t2_lb = t2_lb.find(k/_pagePerBlock);
@@ -312,7 +312,7 @@ public:
                 }
             }
 
-            ///ziqi: Case B
+            // Case B
             else if((t1.size() + b1.size()) < _capacity) {
                 if((t1.size() + t2.size() + b1.size() + b2.size()) >= _capacity) {
                     if((t1.size() + t2.size() + b1.size() + b2.size()) == 2 * _capacity) {
@@ -339,7 +339,7 @@ public:
             }
             else {
                 t1_key.remove(k/_pagePerBlock);
-                t1_key.insert(t2_key.end(), k/_pagePerBlock);
+                t1_key.insert(t1_key.end(), k/_pagePerBlock);
             }
 
             // insert the page to t1 cache
@@ -418,6 +418,7 @@ public:
 
             // select the LRU block of t2
             int lruBlockNumber = *(t2_key.begin());
+            PRINTV(logfile << "lruBlockNumber = " << lruBlockNumber << endl;);
             typename key_to_value_for_largeblock_type::iterator it_eviction = t2_lb.find(lruBlockNumber);
             assert(it_eviction != t2_lb.end());
 
