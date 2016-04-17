@@ -15,6 +15,7 @@
 #include "lb-car.h"
 #include "lb-arc.h"
 #include "fab.h"
+#include "fab++.h"
 
 /*
 #include "arc.h"
@@ -197,6 +198,9 @@ void	Initialize(int argc, char **argv, deque<reqAtom> & memTrace)
         }
         else if(_gConfiguration.GetAlgName(i).compare("fab") == 0) {
             _gTestCache[i] = new FAB<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], _gConfiguration.ssd2fsblkRatio[i], i);
+        }
+        else if(_gConfiguration.GetAlgName(i).compare("fab++") == 0) {
+            _gTestCache[i] = new FABPlusPlus<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], _gConfiguration.ssd2fsblkRatio[i], i);
         }
         /*
             else if(_gConfiguration.GetAlgName(i).compare("wnrdnd") == 0) {

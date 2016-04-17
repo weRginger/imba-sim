@@ -8,8 +8,10 @@ Done
 - CAR
 - LB-CLOCK
 - BPLRU
+- LB-ARC
 - FAB
+- FAB++ // best for now
 
 To do list
 =========
-- LB-CAR
+- TBD
