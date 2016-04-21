@@ -3,9 +3,7 @@
 //
 // Description: Enhanced version of darc. H-ARC includes frequency and recency on top of dirty and clean.
 //
-// Author: Ziqi Fan, (C) 2014
-//
-// Copyright: See COPYING file that comes with this distribution
+// Author: Ziqi Fan, 2014
 //
 
 #ifndef HARC_H
