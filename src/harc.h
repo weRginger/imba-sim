@@ -20,36 +20,24 @@
 
 using namespace std;
 
-///ziqi: in access(), if the value's time stamp is the first one that equal or bigger than a multiple of 30s, then flushing back all the dirty pages in buffer cache.
-///Then change the dirty pages status to clean. Log these dirty pages into DiskSim input trace.
-///ziqi: in access(), for status is write, add dirty page notation to the status.
-///(done) ziqi: in remove(), modify it as lru_ziqi.h. Log the evicted dirty page.
-
 extern int totalPageWriteToStorage;
 
-// Class providing fixed-size (by number of records)
-// LRU-replacement cache of a function with signature
-// V f(K)
 template <typename K, typename V>
 class HARC : public TestCache<K, V>
 {
 public:
-// Key access history, most recent at back
+    // Key access history, most recent at back
     typedef list<K> key_tracker_type;
-// Key to value and key history iterator
-    typedef map
-    < K, pair<V, typename key_tracker_type::iterator> > 	key_to_value_type;
-// Constuctor specifies the cached function and
-// the maximum number of records to be stored.
+    // Key to value and key history iterator
+    typedef map< K, pair<V, typename key_tracker_type::iterator> > key_to_value_type;
+    // Constuctor specifies the cached function and
+    // the maximum number of records to be stored.
     HARC(
         V(*f)(const K & , V),
         size_t c,
         unsigned levelMinus
     ) : _fn(f) , _capacity(c), levelMinusMinus(levelMinus)  {
-        ///ARH: Commented for single level cache implementation
-//         assert ( _capacity!=0 );
     }
-    // Obtain value of the cached function for k
 
     uint32_t access(const K &k  , V &value, uint32_t status) {
         PRINTV(logfile << endl;);
@@ -67,13 +55,13 @@ public:
         assert(_capacity != 0);
         PRINTV(logfile << "Access key: " << k << endl;);
 
-///ziqi: if request is write, mark the page status as DIRTY
+        // if request is write, mark the page status as DIRTY
         if(status & WRITE) {
             status |= DIRTY;
             value.updateFlags(status);
         }
 
-// Attempt to find existing record
+        // Attempt to find existing record
         const typename key_to_value_type::iterator it_D_1i	= D_1i.find(k);
         const typename key_to_value_type::iterator it_D_2i	= D_2i.find(k);
         const typename key_to_value_type::iterator it_D_1o	= D_1o.find(k);
@@ -83,11 +71,10 @@ public:
         const typename key_to_value_type::iterator it_C_2i	= C_2i.find(k);
         const typename key_to_value_type::iterator it_C_1o	= C_1o.find(k);
         const typename key_to_value_type::iterator it_C_2o	= C_2o.find(k);
-        //const typename key_to_value_type::iterator itNew	= _key_to_value.find(k);
 
-        ///ziqi: DARCER Case I: x hit in C_1i or C_2i, then move x to C_2i if it's a read, or to D_2i if it's a write
+        // H-ARC Case I: x hit in C_1i or C_2i, then move x to C_2i if it's a read, or to D_2i if it's a write
         if(it_C_1i != C_1i.end()) {
-            ///ziqi: if it is a write request
+            // if it is a write request
             if(status & WRITE) {
                 PRINTV(logfile << "Case I Write hit on C_1i " << k << endl;);
 
@@ -104,7 +91,7 @@ public:
                 PRINTV(logfile << "Case I insert dirty key to D_2i: " << k << "** C_1i size: "<< C_1i.size()<< ", C_2i size: "<< C_2i.size() <<", D_1i size: "<< D_1i.size() <<", D_2i size: "<< D_2i.size() <<endl;);
                 return (status | PAGEHIT | BLKHIT);
             }
-            ///ziqi: if it is a read request
+            // if it is a read request
             else {
                 PRINTV(logfile << "Case I Read hit on C_1i " << k << endl;);
 
@@ -113,8 +100,7 @@ public:
                 assert(C_1i.size() < _capacity);
                 const V v = _fn(k, value);
                 // Record k as most-recently-used key
-                typename key_tracker_type::iterator itNew
-                    = C_2i_key.insert(C_2i_key.end(), k);
+                typename key_tracker_type::iterator itNew = C_2i_key.insert(C_2i_key.end(), k);
                 // Create the key-value entry,
                 // linked to the usage record.
                 C_2i.insert(make_pair(k, make_pair(v, itNew)));
@@ -125,7 +111,7 @@ public:
             }
         }
         else if(it_C_2i != C_2i.end()) {
-            ///ziqi: if it is a write request
+            // if it is a write request
             if(status & WRITE) {
                 PRINTV(logfile << "Case I Write hit on C_2i " << k << endl;);
 
@@ -134,15 +120,14 @@ public:
                 assert(C_2i.size() < _capacity);
                 const V v = _fn(k, value);
                 // Record k as most-recently-used key
-                typename key_tracker_type::iterator itNew
-                    = D_2i_key.insert(D_2i_key.end(), k);
+                typename key_tracker_type::iterator itNew = D_2i_key.insert(D_2i_key.end(), k);
                 // Create the key-value entry,
                 // linked to the usage record.
                 D_2i.insert(make_pair(k, make_pair(v, itNew)));
                 PRINTV(logfile << "Case I insert dirty key to D_2i: " << k << "** C_1i size: "<< C_1i.size()<< ", C_2i size: "<< C_2i.size() <<", D_1i size: "<< D_1i.size() <<", D_2i size: "<< D_2i.size() <<endl;);
                 return (status | PAGEHIT | BLKHIT);
             }
-            ///ziqi: if it is a read request
+            // if it is a read request
             else {
                 PRINTV(logfile << "Case I Read hit on C_2i " << k << endl;);
 
@@ -151,8 +136,7 @@ public:
                 assert(C_2i.size() < _capacity);
                 const V v = _fn(k, value);
                 // Record k as most-recently-used key
-                typename key_tracker_type::iterator itNew
-                    = C_2i_key.insert(C_2i_key.end(), k);
+                typename key_tracker_type::iterator itNew = C_2i_key.insert(C_2i_key.end(), k);
                 // Create the key-value entry,
                 // linked to the usage record.
                 C_2i.insert(make_pair(k, make_pair(v, itNew)));
@@ -161,11 +145,11 @@ public:
             }
         }
 
-        ///ziqi: DARCER Case II: x hit in D_1i or D_2i, then move x to MRU of D_2i
+        // H-ARC Case II: x hit in D_1i or D_2i, then move x to MRU of D_2i
         else if(it_D_1i != D_1i.end()) {
             PRINTV(logfile << "Case II hit on D_1i " << k << endl;);
 
-            ///ziqi: if a read hit on a dirty page, preserve the page's dirty status
+            // if a read hit on a dirty page, preserve the page's dirty status
             value.updateFlags(status | (it_D_1i->second.first.getReq().flags & DIRTY));
 
             D_1i.erase(it_D_1i);
@@ -184,7 +168,7 @@ public:
         else if(it_D_2i != D_2i.end()) {
             PRINTV(logfile << "Case II hit on D_2i " << k << endl;);
 
-            ///ziqi: if a read hit on a dirty page, preserve the page's dirty status
+            // if a read hit on a dirty page, preserve the page's dirty status
             value.updateFlags(status | (it_D_2i->second.first.getReq().flags & DIRTY));
 
             D_2i.erase(it_D_2i);
@@ -201,11 +185,11 @@ public:
         }
 
 
-        ///ziqi: DARCER Case III: x hit in C_1o
+        // H-ARC Case III: x hit in C_1o
         else if(it_C_1o != C_1o.end()) {
-            ///ziqi: delta denotes the step in each ADAPTATION of P
+            // delta denotes the step in each ADAPTATION of P
             int delta;
-            ///ziqi: delta denotes the step in each ADAPTATION of P_C
+            // delta denotes the step in each ADAPTATION of P_C
             int delta_C;
 
             PRINTV(logfile << "Case III Hit on C_1o: " << k << endl;);
@@ -294,16 +278,15 @@ public:
                         PRINTV(logfile << "Case III evicting C_2i without flushing back to DiskSim input trace " << *itLRU <<  endl;);
                     }
                 }
-
             }
             return (status | PAGEMISS);
         }
 
-        ///ziqi: DARCER Case IV: x hit in C_2o
+        // H-ARC Case IV: x hit in C_2o
         else if(it_C_2o != C_2o.end()) {
-            ///ziqi: delta denotes the step in each ADAPTATION of P
+            // delta denotes the step in each ADAPTATION of P
             int delta;
-            ///ziqi: delta denotes the step in each ADAPTATION of P_C
+            // delta denotes the step in each ADAPTATION of P_C
             int delta_C;
 
             PRINTV(logfile << "Case IV Hit on C_2o: " << k << endl;);
@@ -397,11 +380,11 @@ public:
             return (status | PAGEMISS);
         }
 
-        ///ziqi: DARCER Case V: x hit in D_1o
+        // H-ARC Case V: x hit in D_1o
         else if(it_D_1o != D_1o.end()) {
-            ///ziqi: delta denotes the step in each ADAPTATION of P
+            // delta denotes the step in each ADAPTATION of P
             int delta;
-            ///ziqi: delta denotes the step in each ADAPTATION of P_D
+            // delta denotes the step in each ADAPTATION of P_D
             int delta_D;
 
             PRINTV(logfile << "Case V Hit on D_1o: " << k << endl;);
@@ -492,11 +475,11 @@ public:
             return (status | PAGEMISS);
         }
 
-        ///ziqi: DARCER Case VI: x hit in D_2o
+        // H-ARC Case VI: x hit in D_2o
         else if(it_D_2o != D_2o.end()) {
-            ///ziqi: delta denotes the step in each ADAPTATION of P
+            // delta denotes the step in each ADAPTATION of P
             int delta;
-            ///ziqi: delta denotes the step in each ADAPTATION of P_D
+            // delta denotes the step in each ADAPTATION of P_D
             int delta_D;
 
             PRINTV(logfile << "Case VI Hit on D_2o: " << k << endl;);
@@ -587,15 +570,15 @@ public:
             return (status | PAGEMISS);
         }
 
-        ///ziqi: HARC Case VII: x is cache miss
+        // H-ARC Case VII: x is cache miss
         else {
             PRINTV(logfile << "Case VII miss on key: " << k << endl;);
 
-            ///afterCacheTrace
-            PRINTV(AFTERCACHETRACE <<value.getFsblkno()<<"R"<<endl;);
-            ///afterCacheTrace
+            // afterCacheTrace
+            // PRINTV(AFTERCACHETRACE <<value.getFsblkno()<<" R"<<endl;);
+            // afterCacheTrace
 
-            ///ziqi: Case A
+            // Case A
             if((C_1i.size() + C_2i.size() + C_1o.size() + C_2o.size()) == _capacity) {
                 if((C_1i.size() + C_2i.size()) < _capacity) {
                     if(C_1o.size() > 0) {
@@ -647,7 +630,7 @@ public:
                     C_2i_key.remove(*itLRU);
                 }
             }
-            ///ziqi: Case B
+            // Case B
             else if((C_1i.size() + C_2i.size() + C_1o.size() + C_2o.size()) < _capacity) {
                 if((D_1i.size() + D_2i.size() + C_1i.size() + C_2i.size() + D_1o.size() + D_2o.size() + C_1o.size() + C_2o.size()) >= _capacity) {
                     if((D_1i.size() + D_2i.size() + C_1i.size() + C_2i.size() + D_1o.size() + D_2o.size() + C_1o.size() + C_2o.size()) == 2 * _capacity) {
@@ -699,7 +682,7 @@ public:
 
     } //end operator access
 
-    ///ziqi: HARC subroutine
+    // H-ARC subroutine
     void REPLACE(const K &k, const V &v, int P, double P_D, double P_C) {
         typename key_to_value_type::iterator it_D_1o = D_1o.find(k);
         typename key_to_value_type::iterator it_D_2o = D_2o.find(k);
@@ -768,23 +751,21 @@ public:
 
             PRINTV(logfile << "REPLACE insert key to D_1o: " << *itLRU <<  "** D_1o size: "<< D_1o.size() << endl;);
 
-            ///ziqi: DiskSim format Request_arrival_time Device_number Block_number Request_size Request_flags
-            ///ziqi: Device_number is set to 1. About Request_flags, 0 is for write and 1 is for read
+            // DiskSim format Request_arrival_time Device_number Block_number Request_size Request_flags
+            // Device_number is set to 1. About Request_flags, 0 is for write and 1 is for read
             PRINTV(DISKSIMINPUTSTREAM << setfill(' ')<<left<<fixed<<setw(25)<<v.getReq().issueTime<<left<<setw(8)<<"0"<<left<<fixed<<setw(12)<<itLRUValue->second.first.getReq().fsblkno<<left<<fixed<<setw(8)<<itLRUValue->second.first.getReq().reqSize<<"0"<<endl;);
 
             PRINTV(logfile << "REPLACE evicting dirty key " << *itLRU <<  endl;);
             totalPageWriteToStorage++;
             PRINTV(logfile << "REPLACE Key dirty bit status: " << bitset<10>(itLRUValue->second.first.getReq().flags) << endl;);
 
-            ///afterCacheTrace
-            PRINTV(AFTERCACHETRACE <<*itLRU<<"W"<<endl;);
-            ///afterCacheTrace
+            // afterCacheTrace
+            PRINTV(AFTERCACHETRACE << "W " << *itLRU <<endl;);
+            // afterCacheTrace
 
             D_1i.erase(itLRUValue);
             D_1i_key.remove(*itLRU);
             PRINTV(logfile << "REPLACE D_1i size: " << D_1i.size() <<endl;);
-
-
         }
         else {
             typename key_tracker_type::iterator itLRU = D_2i_key.begin();
@@ -799,17 +780,17 @@ public:
 
             PRINTV(logfile << "REPLACE insert key to D_2o: " << *itLRU <<  "** D_2o size: "<< D_2o.size() << endl;);
 
-            ///ziqi: DiskSim format Request_arrival_time Device_number Block_number Request_size Request_flags
-            ///ziqi: Device_number is set to 1. About Request_flags, 0 is for write and 1 is for read
+            // DiskSim format Request_arrival_time Device_number Block_number Request_size Request_flags
+            // Device_number is set to 1. About Request_flags, 0 is for write and 1 is for read
             PRINTV(DISKSIMINPUTSTREAM << setfill(' ')<<left<<fixed<<setw(25)<<v.getReq().issueTime<<left<<setw(8)<<"0"<<left<<fixed<<setw(12)<<itLRUValue->second.first.getReq().fsblkno<<left<<fixed<<setw(8)<<itLRUValue->second.first.getReq().reqSize<<"0"<<endl;);
 
             PRINTV(logfile << "REPLACE evicting dirty key " << *itLRU <<  endl;);
             totalPageWriteToStorage++;
             PRINTV(logfile << "REPLACE Key dirty bit status: " << bitset<10>(itLRUValue->second.first.getReq().flags) << endl;);
 
-            ///afterCacheTrace
-            PRINTV(AFTERCACHETRACE <<*itLRU<<"W"<<endl;);
-            ///afterCacheTrace
+            // afterCacheTrace
+            PRINTV(AFTERCACHETRACE << "W " << *itLRU <<endl;);
+            // afterCacheTrace
 
             D_2i.erase(itLRUValue);
             D_2i_key.remove(*itLRU);
