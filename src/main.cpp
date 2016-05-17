@@ -9,19 +9,18 @@
 #include "stats.h"
 
 #include "lru.h"
-#include "lb-arc.h"
 #include "harc.h"
 #include "fab++.h"
+#include "bplru.h"
+#include "lb-clock.h"
+#include "fab.h"
 
 /*
-#include "bplru.h"
+#include "lb-arc.h"
 #include "clock.h"
-#include "lb-clock.h"
 #include "car.h"
 #include "lb-car.h"
-#include "fab.h"
 #include "arc.h"
-#include "harc.h"
 #include "harc++.h"
 #include "arc++.h"
 #include "hybrid-fixed.h"
@@ -183,27 +182,27 @@ void	Initialize(int argc, char **argv, deque<reqAtom> & memTrace)
         else if(_gConfiguration.GetAlgName(i).compare("h-arc") == 0) {
             _gTestCache[i] = new HARC<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
         }
-        else if(_gConfiguration.GetAlgName(i).compare("lb-arc") == 0) {
-            _gTestCache[i] = new LBARC<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], _gConfiguration.ssd2fsblkRatio[i], i);
-        }
         else if(_gConfiguration.GetAlgName(i).compare("fab++") == 0) {
             _gTestCache[i] = new FABPlusPlus<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], _gConfiguration.ssd2fsblkRatio[i], i);
         }
+        else if(_gConfiguration.GetAlgName(i).compare("lb-clock") == 0) {
+            _gTestCache[i] = new LBCLOCK<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], _gConfiguration.ssd2fsblkRatio[i], i);
+        }
+        else if(_gConfiguration.GetAlgName(i).compare("bplru") == 0) {
+            _gTestCache[i] = new BPLRU<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], _gConfiguration.ssd2fsblkRatio[i], i);
+        }
+        else if(_gConfiguration.GetAlgName(i).compare("fab") == 0) {
+            _gTestCache[i] = new FAB<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], _gConfiguration.ssd2fsblkRatio[i], i);
+        }
         /*
-        * else if(_gConfiguration.GetAlgName(i).compare("bplru") == 0) {
-                  _gTestCache[i] = new BPLRU<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], _gConfiguration.ssd2fsblkRatio[i], i);
-              }
+        *else if(_gConfiguration.GetAlgName(i).compare("lb-arc") == 0) {
+          _gTestCache[i] = new LBARC<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], _gConfiguration.ssd2fsblkRatio[i], i);
+          }
               else if(_gConfiguration.GetAlgName(i).compare("clock") == 0) {
                   _gTestCache[i] = new CLOCK<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
               }
-              else if(_gConfiguration.GetAlgName(i).compare("lb-clock") == 0) {
-                  _gTestCache[i] = new LBCLOCK<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], _gConfiguration.ssd2fsblkRatio[i], i);
-              }
               else if(_gConfiguration.GetAlgName(i).compare("car") == 0) {
                   _gTestCache[i] = new CAR<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-              }
-         else if(_gConfiguration.GetAlgName(i).compare("fab") == 0) {
-                  _gTestCache[i] = new FAB<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], _gConfiguration.ssd2fsblkRatio[i], i);
               }
                   else if(_gConfiguration.GetAlgName(i).compare("wnrdnd") == 0) {
                       _gTestCache[i] = new WNRDND<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
