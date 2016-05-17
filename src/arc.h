@@ -250,12 +250,10 @@ public:
             ///PRINTV(logfile << "Case IV insert key to t1: " << k << "** t1 size: "<< t1.size()<< ", t2 size: "<< t2.size() <<endl;);
             return (status | PAGEMISS);
         }
-
         return 0;
-
     } //end operator access
 
-    ///ziqi: ARC subroutine
+    // ARC subroutine
     void REPLACE(const K &k, const V &v, int p) {
         typename key_to_value_type::iterator it = b2.find(k);
 
@@ -271,10 +269,10 @@ public:
             const V v_tmp = _fn(*itLRU, itLRUValue->second.first);
             b1.insert(make_pair(*itLRU, make_pair(v_tmp, itNew)));
             PRINTV(logfile << "REPLACE insert key to b1: " << *itLRU <<  "** b1 size: "<< b1.size() << endl;);
-            ///PRINTV(logfile << "REPLACE Key clean bit status: " << bitset<10>(itLRUValue->second.first.getReq().flags) << endl;);
+            //PRINTV(logfile << "REPLACE Key clean bit status: " << bitset<10>(itLRUValue->second.first.getReq().flags) << endl;);
             t1.erase(itLRUValue);
             t1_key.remove(*itLRU);
-            ///PRINTV(logfile << "REPLACE t1 size: " << t1.size() <<endl;);
+            //PRINTV(logfile << "REPLACE t1 size: " << t1.size() <<endl;);
         }
         else {
             typename key_tracker_type::iterator itLRU = t2_key.begin();
@@ -289,9 +287,6 @@ public:
             b2.insert(make_pair(*itLRU, make_pair(v_tmp, itNew)));
             PRINTV(logfile << "REPLACE insert key to b2: " << *itLRU <<  "** b2 size: "<< b2.size() << endl;);
 
-            ///ziqi: DiskSim format Request_arrival_time Device_number Block_number Request_size Request_flags
-            ///ziqi: Device_number is set to 1. About Request_flags, 0 is for write and 1 is for read
-            PRINTV(DISKSIMINPUTSTREAM << setfill(' ')<<left<<fixed<<setw(25)<<v.getReq().issueTime<<left<<setw(8)<<"0"<<left<<fixed<<setw(12)<<*itLRU<<left<<fixed<<setw(8)<<"1"<<"0"<<endl;);
             // Erase both elements to completely purge record
             ///PRINTV(logfile << "REPLACE evicting dirty key " << *itLRU <<  endl;);
             totalPageWriteToStorage++;
@@ -299,7 +294,9 @@ public:
             t2.erase(itLRUValue);
             t2_key.remove(*itLRU);
 
-            ///PRINTV(logfile << "REPLACE t2 size: " << t2.size() <<endl;);
+            // afterCacheTrace
+            PRINTV(AFTERCACHETRACE << "W " << *itLRU <<endl;);
+            // afterCacheTrace
         }
     }
 

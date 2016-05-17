@@ -218,7 +218,7 @@ bool Configuration::read(int argc, char **argv)
                 int lastSlash = traceNameStringType.find_last_of('/');
                 int lastDot = traceNameStringType.find_last_of('.');
                 //std::cout<<"lastSlash "<<lastSlash<<" lastDot "<<lastDot<<std::endl;
-                diskSimInputTraceName = tempStr+"-Policy_"+policyName[i]+"-cacheSize_"+cacheSizeInStr+"-cacheNvramSize_"+cacheNvramSizeInStr+"-Trace_"+traceNameStringType.substr(lastSlash+1,lastDot-lastSlash-1)+".trace";
+                diskSimInputTraceName = tempStr+"-policy_"+policyName[i]+"-cachesize_"+cacheSizeInStr+"-tracename_"+traceNameStringType.substr(lastSlash+1,lastDot-lastSlash-1)+".trace";
                 diskSimInputStream.open((diskSimInputTraceName).c_str(), std::ios::trunc);
             }
             ///end here
@@ -238,7 +238,7 @@ bool Configuration::read(int argc, char **argv)
                 int lastSlash = traceNameStringType.find_last_of('/');
                 int lastDot = traceNameStringType.find_last_of('.');
                 //std::cout<<"lastSlash "<<lastSlash<<" lastDot "<<lastDot<<std::endl;
-                afterCacheTraceName = tempStr+"-Policy_"+policyName[i]+"-cacheSize_"+cacheSizeInStr+"-cacheNvramSize_"+cacheNvramSizeInStr+"-Trace_"+traceNameStringType.substr(lastSlash+1,lastDot-lastSlash-1)+".trace";
+                afterCacheTraceName = tempStr+"-policy_"+policyName[i]+"-cachesize_"+cacheSizeInStr+"-tracename_"+traceNameStringType.substr(lastSlash+1,lastDot-lastSlash-1)+".trace";
                 afterCacheTraceStream.open((afterCacheTraceName).c_str(), std::ios::trunc);
             }
             ///end here

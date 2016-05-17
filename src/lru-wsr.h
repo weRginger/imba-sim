@@ -175,15 +175,19 @@ private:
                     PRINTV(DISKSIMINPUTSTREAM << setfill(' ')<<left<<fixed<<setw(25)<<v.getReq().issueTime<<left<<setw(8)<<"0"<<left<<fixed<<setw(12)<<*itTracker<<left<<fixed<<setw(8)<<"1"<<"0"<<endl;);
 
                     // Erase both elements to completely purge record
-                    PRINTV(logfile << "evicting dirty key " << *(itTracker) <<  endl;);
+                    PRINTV(logfile << "evicting dirty key " << *itTracker <<  endl;);
                     totalPageWriteToStorage++;
                     PRINTV(logfile << "Key dirty bit status: " << bitset<13>(it->second.first.getReq().flags) << endl;);
                     it = _key_to_value.find(*itTracker);
                     assert(it != _key_to_value.end());
                     _key_to_value.erase(it);
-                    _key_tracker.remove(*(itTracker));
+                    _key_tracker.remove(*itTracker);
 
                     evictSth = true;
+
+                    // afterCacheTrace
+                    PRINTV(AFTERCACHETRACE << "W " << *itTracker <<endl;);
+                    // afterCacheTrace
 
                     PRINTV(logfile << "Cache utilization: " << _key_to_value.size() <<"/"<<_capacity <<endl;);
 
@@ -243,6 +247,10 @@ private:
 
             _key_to_value.erase(it);
             _key_tracker.remove(*itTracker);
+
+            // afterCacheTrace
+            PRINTV(AFTERCACHETRACE << "W " << *itTracker <<endl;);
+            // afterCacheTrace
 
             PRINTV(logfile << "Cache utilization: " << _key_to_value.size() <<"/"<<_capacity <<endl;);
         }
