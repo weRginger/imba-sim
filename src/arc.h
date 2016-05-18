@@ -32,8 +32,7 @@ public:
     // Key access history, most recent at back
     typedef list<K> key_tracker_type;
     // Key to value and key history iterator
-    typedef map
-    < K, pair<V, typename key_tracker_type::iterator> > 	key_to_value_type;
+    typedef map< K, pair<V, typename key_tracker_type::iterator> > key_to_value_type;
     ARC(
         V(*f)(const K & , V),
         size_t c,
@@ -72,6 +71,9 @@ public:
             if((it_t1 != t1.end()) && (it_t2 == t2.end())) {
                 PRINTV(logfile << "Case I Hit on t1 " << k << endl;);
 
+                // if a read hit on a dirty page, preserve the page's dirty status
+                value.updateFlags(status | (it_t1->second.first.getReq().flags & DIRTY));
+
                 t1.erase(it_t1);
                 t1_key.remove(k);
                 assert(t1.size() < _capacity);
@@ -87,6 +89,9 @@ public:
 
             if((it_t2 != t2.end()) && (it_t1 == t1.end())) {
                 PRINTV(logfile << "Case I Hit on t2 " << k << endl;);
+
+                // if a read hit on a dirty page, preserve the page's dirty status
+                value.updateFlags(status | (it_t2->second.first.getReq().flags & DIRTY));
 
                 t2.erase(it_t2);
                 t2_key.remove(k);
@@ -109,11 +114,6 @@ public:
             int delta;
 
             PRINTV(logfile << "Case II Hit on b1: " << k << endl;);
-
-            // Disk read after a cache miss
-            // DiskSim format Request_arrival_time Device_number Block_number Request_size Request_flags
-            // Device_number is set to 1. About Request_flags, 0 is for write and 1 is for read
-            PRINTV(DISKSIMINPUTSTREAM << setfill(' ')<<left<<fixed<<setw(25)<<value.getReq().issueTime<<left<<setw(8)<<"0"<<left<<fixed<<setw(12)<<k<<left<<fixed<<setw(8)<<"1"<<"1"<<endl;);
 
             if(b1.size() >= b2.size())
                 delta = 1;
@@ -153,11 +153,6 @@ public:
             int delta;
 
             PRINTV(logfile << "Case III Hit on b2: " << k << endl;);
-
-            // Disk read after a cache miss
-            // DiskSim format Request_arrival_time Device_number Block_number Request_size Request_flags
-            // Device_number is set to 1. About Request_flags, 0 is for write and 1 is for read
-            PRINTV(DISKSIMINPUTSTREAM << setfill(' ')<<left<<fixed<<setw(25)<<value.getReq().issueTime<<left<<setw(8)<<"0"<<left<<fixed<<setw(12)<<k<<left<<fixed<<setw(8)<<"1"<<"1"<<endl;);
 
             if(b2.size() >= b1.size())
                 delta = 1;
@@ -213,6 +208,14 @@ public:
                     typename key_tracker_type::iterator itLRU = t1_key.begin();
                     assert(itLRU != t1_key.end());
                     typename key_to_value_type::iterator it = t1.find(*itLRU);
+
+                    if(it->second.first.getReq().flags & DIRTY) {
+                        totalPageWriteToStorage++;
+                        // afterCacheTrace
+                        PRINTV(AFTERCACHETRACE << "W " << *itLRU <<endl;);
+                        // afterCacheTrace
+                    }
+
                     t1.erase(it);
                     t1_key.remove(*itLRU);
                 }

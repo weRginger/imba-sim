@@ -10,6 +10,7 @@
 
 #include "lru.h"
 
+#include "darcer.h"
 #include "harc.h"
 #include "arc.h"
 #include "lru-wsr.h"
@@ -181,6 +182,9 @@ void	Initialize(int argc, char **argv, deque<reqAtom> & memTrace)
     for(int i = 0; i < _gConfiguration.totalLevels ; i++) {
         if(_gConfiguration.GetAlgName(i).compare("lru") == 0) {
             _gTestCache[i] = new LRU<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+        }
+        else if(_gConfiguration.GetAlgName(i).compare("darcer") == 0) {
+            _gTestCache[i] = new HARC<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
         }
         else if(_gConfiguration.GetAlgName(i).compare("h-arc") == 0) {
             _gTestCache[i] = new HARC<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
