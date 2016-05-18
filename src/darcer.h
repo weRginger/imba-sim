@@ -28,9 +28,9 @@ using namespace std;
 ///ziqi: in access(), for status is write, add dirty page notation to the status.
 ///(done) ziqi: in remove(), modify it as lru_ziqi.h. Log the evicted dirty page.
 
-extern int totalEvictedCleanPages;
+//extern int totalEvictedCleanPages;
 
-extern int totalNonSeqEvictedDirtyPages;
+extern int totalPageWriteToStorage;
 
 // Class providing fixed-size (by number of records)
 // LRU-replacement cache of a function with signature
@@ -292,7 +292,7 @@ public:
                         typename key_to_value_type::iterator it = C_1i.find(*itLRU);
                         C_1i.erase(it);
                         C_1i_key.remove(*itLRU);
-                        totalEvictedCleanPages++;
+                        //totalEvictedCleanPages++;
                         PRINTV(logfile << "Case III evicting C_1i without flushing back to DiskSim input trace " << *itLRU <<  endl;);
                     }
                     else if(C_2i.size() > 0) {
@@ -301,7 +301,7 @@ public:
                         typename key_to_value_type::iterator it = C_2i.find(*itLRU);
                         C_2i.erase(it);
                         C_2i_key.remove(*itLRU);
-                        totalEvictedCleanPages++;
+                        //totalEvictedCleanPages++;
                         PRINTV(logfile << "Case III evicting C_2i without flushing back to DiskSim input trace " << *itLRU <<  endl;);
                     }
                 }
@@ -396,7 +396,7 @@ public:
                         typename key_to_value_type::iterator it = C_1i.find(*itLRU);
                         C_1i.erase(it);
                         C_1i_key.remove(*itLRU);
-                        totalEvictedCleanPages++;
+                        //totalEvictedCleanPages++;
                         PRINTV(logfile << "Case IV evicting C_1i without flushing back to DiskSim input trace " << *itLRU <<  endl;);
                     }
                     else if(C_2i.size() > 0) {
@@ -405,7 +405,7 @@ public:
                         typename key_to_value_type::iterator it = C_2i.find(*itLRU);
                         C_2i.erase(it);
                         C_2i_key.remove(*itLRU);
-                        totalEvictedCleanPages++;
+                        //totalEvictedCleanPages++;
                         PRINTV(logfile << "Case IV evicting C_2i without flushing back to DiskSim input trace " << *itLRU <<  endl;);
                     }
                 }
@@ -493,7 +493,7 @@ public:
                         typename key_to_value_type::iterator it = C_1i.find(*itLRU);
                         C_1i.erase(it);
                         C_1i_key.remove(*itLRU);
-                        totalEvictedCleanPages++;
+                        //totalEvictedCleanPages++;
                         PRINTV(logfile << "Case V evicting C_1i without flushing back to DiskSim input trace " << *itLRU <<  endl;);
                     }
                     else if(C_2i.size() > 0) {
@@ -502,7 +502,7 @@ public:
                         typename key_to_value_type::iterator it = C_2i.find(*itLRU);
                         C_2i.erase(it);
                         C_2i_key.remove(*itLRU);
-                        totalEvictedCleanPages++;
+                        //totalEvictedCleanPages++;
                         PRINTV(logfile << "Case V evicting C_2i without flushing back to DiskSim input trace " << *itLRU <<  endl;);
                     }
                 }
@@ -590,7 +590,7 @@ public:
                         typename key_to_value_type::iterator it = C_1i.find(*itLRU);
                         C_1i.erase(it);
                         C_1i_key.remove(*itLRU);
-                        totalEvictedCleanPages++;
+                        //totalEvictedCleanPages++;
                         PRINTV(logfile << "Case VI evicting C_1i without flushing back to DiskSim input trace " << *itLRU <<  endl;);
                     }
                     else if(C_2i.size() > 0) {
@@ -599,7 +599,7 @@ public:
                         typename key_to_value_type::iterator it = C_2i.find(*itLRU);
                         C_2i.erase(it);
                         C_2i_key.remove(*itLRU);
-                        totalEvictedCleanPages++;
+                        //totalEvictedCleanPages++;
                         PRINTV(logfile << "Case VI evicting C_2i without flushing back to DiskSim input trace " << *itLRU <<  endl;);
                     }
                 }
@@ -645,7 +645,7 @@ public:
                     typename key_to_value_type::iterator it = C_1i.find(*itLRU);
 
                     ///PRINTV(logfile << "Case VII evicting clean key without flushing back to DiskSim input trace " << *itLRU <<  endl;);
-                    totalEvictedCleanPages++;
+                    //totalEvictedCleanPages++;
                     ///PRINTV(logfile << "Case VII Key clean bit status: " << bitset<10>(it->second.first.getReq().flags) << endl;);
 
                     C_1i.erase(it);
@@ -659,7 +659,7 @@ public:
 
 
                     ///PRINTV(logfile << "Case VII evicting clean key without flushing back to DiskSim input trace " << *itLRU <<  endl;);
-                    totalEvictedCleanPages++;
+                    //totalEvictedCleanPages++;
                     ///PRINTV(logfile << "Case VII Key clean bit status: " << bitset<10>(it->second.first.getReq().flags) << endl;);
 
                     C_2i.erase(it);
@@ -738,7 +738,7 @@ public:
                 PRINTV(logfile << "REPLACE insert key to b1: " << *itLRU <<  "** b1 size: "<< C_1o.size() << endl;);
 
                 ///PRINTV(logfile << "REPLACE evicting clean key without flushing back to DiskSim input trace " << *itLRU <<  endl;);
-                totalEvictedCleanPages++;
+                //totalEvictedCleanPages++;
                 ///PRINTV(logfile << "REPLACE Key clean bit status: " << bitset<10>(itLRUValue->second.first.getReq().flags) << endl;);
 
                 C_1i.erase(itLRUValue);
@@ -762,7 +762,7 @@ public:
                 PRINTV(logfile << "REPLACE insert key to b2: " << *itLRU <<  "** b2 size: "<< C_2o.size() << endl;);
 
                 ///PRINTV(logfile << "REPLACE evicting clean key without flushing back to DiskSim input trace " << *itLRU <<  endl;);
-                totalEvictedCleanPages++;
+                //totalEvictedCleanPages++;
                 ///PRINTV(logfile << "REPLACE Key clean bit status: " << bitset<10>(itLRUValue->second.first.getReq().flags) << endl;);
 
                 C_2i.erase(itLRUValue);
@@ -792,7 +792,7 @@ public:
             PRINTV(DISKSIMINPUTSTREAM << setfill(' ')<<left<<fixed<<setw(25)<<v.getReq().issueTime<<left<<setw(8)<<"0"<<left<<fixed<<setw(12)<<itLRUValue->second.first.getReq().fsblkno<<left<<fixed<<setw(8)<<itLRUValue->second.first.getReq().reqSize<<"0"<<endl;);
 
             ///PRINTV(logfile << "REPLACE evicting dirty key " << *itLRU <<  endl;);
-            totalNonSeqEvictedDirtyPages++;
+            totalPageWriteToStorage++;
             ///PRINTV(logfile << "REPLACE Key dirty bit status: " << bitset<10>(itLRUValue->second.first.getReq().flags) << endl;);
 
             D_1i.erase(itLRUValue);
@@ -819,7 +819,7 @@ public:
             PRINTV(DISKSIMINPUTSTREAM << setfill(' ')<<left<<fixed<<setw(25)<<v.getReq().issueTime<<left<<setw(8)<<"0"<<left<<fixed<<setw(12)<<itLRUValue->second.first.getReq().fsblkno<<left<<fixed<<setw(8)<<itLRUValue->second.first.getReq().reqSize<<"0"<<endl;);
 
             ///PRINTV(logfile << "REPLACE evicting dirty key " << *itLRU <<  endl;);
-            totalNonSeqEvictedDirtyPages++;
+            totalPageWriteToStorage++;
             ///PRINTV(logfile << "REPLACE Key dirty bit status: " << bitset<10>(itLRUValue->second.first.getReq().flags) << endl;);
 
             D_2i.erase(itLRUValue);
