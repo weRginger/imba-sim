@@ -23,40 +23,27 @@
 
 using namespace std;
 
-///ziqi: in access(), if the value's time stamp is the first one that equal or bigger than a multiple of 30s, then flushing back all the dirty pages in buffer cache.
-///Then change the dirty pages status to clean. Log these dirty pages into DiskSim input trace.
-///ziqi: in access(), for status is write, add dirty page notation to the status.
-///(done) ziqi: in remove(), modify it as lru_ziqi.h. Log the evicted dirty page.
-
 extern int totalPageWriteToStorage;
 
-// Class providing fixed-size (by number of records)
-// LRU-replacement cache of a function with signature
-// V f(K)
 template <typename K, typename V>
 class ARC : public TestCache<K, V>
 {
 public:
-// Key access history, most recent at back
+    // Key access history, most recent at back
     typedef list<K> key_tracker_type;
-// Key to value and key history iterator
+    // Key to value and key history iterator
     typedef map
     < K, pair<V, typename key_tracker_type::iterator> > 	key_to_value_type;
-// Constuctor specifies the cached function and
-// the maximum number of records to be stored.
     ARC(
         V(*f)(const K & , V),
         size_t c,
         unsigned levelMinus
     ) : _fn(f) , _capacity(c), levelMinusMinus(levelMinus)  {
-        ///ARH: Commented for single level cache implementation
-//         assert ( _capacity!=0 );
     }
-    // Obtain value of the cached function for k
 
     uint32_t access(const K &k  , V &value, uint32_t status) {
         PRINTV(logfile << endl;);
-        ///ziqi: p denotes the length of t1 and (_capacity - p) denotes the lenght of t2
+        // p denotes the length of t1 and (_capacity - p) denotes the lenght of t2
         static int p=0;
 
         assert((t1.size() + t2.size()) <= _capacity);
@@ -66,14 +53,20 @@ public:
         assert(_capacity != 0);
         PRINTV(logfile << "Access key: " << k << endl;);
 
-// Attempt to find existing record
+        // if request is write, mark the page status as DIRTY
+        if(status & WRITE) {
+            status |= DIRTY;
+            value.updateFlags(status);
+        }
+
+        // Attempt to find existing record
         const typename key_to_value_type::iterator it_t1	= t1.find(k);
         const typename key_to_value_type::iterator it_t2	= t2.find(k);
         const typename key_to_value_type::iterator it_b1	= b1.find(k);
         const typename key_to_value_type::iterator it_b2	= b2.find(k);
         //const typename key_to_value_type::iterator itNew	= _key_to_value.find(k);
 
-        ///ziqi: ARC Case I: x hit in t1 or t2, then move x to t2
+        // ARC Case I: x hit in t1 or t2, then move x to t2
         if((it_t1 != t1.end()) || (it_t2 != t2.end())) {
             assert(!((it_t1 != t1.end()) && (it_t2 != t2.end())));
             if((it_t1 != t1.end()) && (it_t2 == t2.end())) {
@@ -110,16 +103,16 @@ public:
             return (status | PAGEHIT | BLKHIT);
 
         }
-        ///ziqi: ARC Case II: x hit in b1, then enlarge t1 and move x from b1 to t2
+        // ARC Case II: x hit in b1, then enlarge t1 and move x from b1 to t2
         else if(it_b1 != b1.end()) {
-            ///ziqi: delta denotes the step in each ADAPTATION
+            // delta denotes the step in each ADAPTATION
             int delta;
 
             PRINTV(logfile << "Case II Hit on b1: " << k << endl;);
 
-            ///Disk read after a cache miss
-            ///ziqi: DiskSim format Request_arrival_time Device_number Block_number Request_size Request_flags
-            ///ziqi: Device_number is set to 1. About Request_flags, 0 is for write and 1 is for read
+            // Disk read after a cache miss
+            // DiskSim format Request_arrival_time Device_number Block_number Request_size Request_flags
+            // Device_number is set to 1. About Request_flags, 0 is for write and 1 is for read
             PRINTV(DISKSIMINPUTSTREAM << setfill(' ')<<left<<fixed<<setw(25)<<value.getReq().issueTime<<left<<setw(8)<<"0"<<left<<fixed<<setw(12)<<k<<left<<fixed<<setw(8)<<"1"<<"1"<<endl;);
 
             if(b1.size() >= b2.size())
@@ -154,16 +147,16 @@ public:
             PRINTV(logfile << "Case II insert key to t2: " << k << "** t1 size: "<< t1.size()<< ", t2 size: "<< t2.size() <<endl;);
             return (status | PAGEMISS);
         }
-        ///ziqi: ARC Case III: x hit in b2, then enlarge t2 and move x from b2 to t2
+        // ARC Case III: x hit in b2, then enlarge t2 and move x from b2 to t2
         else if(it_b2 != b2.end()) {
-            ///ziqi: delta denotes the step in each ADAPTATION
+            // delta denotes the step in each ADAPTATION
             int delta;
 
             PRINTV(logfile << "Case III Hit on b2: " << k << endl;);
 
-            ///Disk read after a cache miss
-            ///ziqi: DiskSim format Request_arrival_time Device_number Block_number Request_size Request_flags
-            ///ziqi: Device_number is set to 1. About Request_flags, 0 is for write and 1 is for read
+            // Disk read after a cache miss
+            // DiskSim format Request_arrival_time Device_number Block_number Request_size Request_flags
+            // Device_number is set to 1. About Request_flags, 0 is for write and 1 is for read
             PRINTV(DISKSIMINPUTSTREAM << setfill(' ')<<left<<fixed<<setw(25)<<value.getReq().issueTime<<left<<setw(8)<<"0"<<left<<fixed<<setw(12)<<k<<left<<fixed<<setw(8)<<"1"<<"1"<<endl;);
 
             if(b2.size() >= b1.size())
@@ -198,11 +191,11 @@ public:
             PRINTV(logfile << "Case III insert key to t2: " << k << "** t1 size: "<< t1.size()<< ", t2 size: "<< t2.size() <<endl;);
             return (status | PAGEMISS);
         }
-        ///ziqi: ARC Case IV: x is cache miss
+        // ARC Case IV: x is cache miss
         else {
             PRINTV(logfile << "Case IV miss on key: " << k << endl;);
             PRINTV(logfile << "Case IV status: ** t1 size: "<< t1.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
-            ///ziqi: Case A
+            // Case A
             if((t1.size() + b1.size()) == _capacity) {
                 if(t1.size() < _capacity) {
                     typename key_tracker_type::iterator itLRU = b1_key.begin();
@@ -210,7 +203,7 @@ public:
                     typename key_to_value_type::iterator it = b1.find(*itLRU);
                     b1.erase(it);
                     b1_key.remove(*itLRU);
-                    ///PRINTV(logfile << "Case IV evicting b1 " << *itLRU <<  endl;);
+                    //PRINTV(logfile << "Case IV evicting b1 " << *itLRU <<  endl;);
 
                     const V v = _fn(k, value);
 
@@ -224,7 +217,7 @@ public:
                     t1_key.remove(*itLRU);
                 }
             }
-            ///ziqi: Case B
+            // Case B
             else if((t1.size() + b1.size()) < _capacity) {
                 if((t1.size() + t2.size() + b1.size() + b2.size()) >= _capacity) {
                     if((t1.size() + t2.size() + b1.size() + b2.size()) == 2 * _capacity) {
@@ -269,10 +262,16 @@ public:
             const V v_tmp = _fn(*itLRU, itLRUValue->second.first);
             b1.insert(make_pair(*itLRU, make_pair(v_tmp, itNew)));
             PRINTV(logfile << "REPLACE insert key to b1: " << *itLRU <<  "** b1 size: "<< b1.size() << endl;);
-            //PRINTV(logfile << "REPLACE Key clean bit status: " << bitset<10>(itLRUValue->second.first.getReq().flags) << endl;);
+
+            if(itLRUValue->second.first.getReq().flags & DIRTY) {
+                totalPageWriteToStorage++;
+                // afterCacheTrace
+                PRINTV(AFTERCACHETRACE << "W " << *itLRU <<endl;);
+                // afterCacheTrace
+            }
+
             t1.erase(itLRUValue);
             t1_key.remove(*itLRU);
-            //PRINTV(logfile << "REPLACE t1 size: " << t1.size() <<endl;);
         }
         else {
             typename key_tracker_type::iterator itLRU = t2_key.begin();
@@ -287,16 +286,15 @@ public:
             b2.insert(make_pair(*itLRU, make_pair(v_tmp, itNew)));
             PRINTV(logfile << "REPLACE insert key to b2: " << *itLRU <<  "** b2 size: "<< b2.size() << endl;);
 
-            // Erase both elements to completely purge record
-            ///PRINTV(logfile << "REPLACE evicting dirty key " << *itLRU <<  endl;);
-            totalPageWriteToStorage++;
-            ///PRINTV(logfile << "REPLACE Key dirty bit status: " << bitset<10>(itLRUValue->second.first.getReq().flags) << endl;);
+            if(itLRUValue->second.first.getReq().flags & DIRTY) {
+                totalPageWriteToStorage++;
+                // afterCacheTrace
+                PRINTV(AFTERCACHETRACE << "W " << *itLRU <<endl;);
+                // afterCacheTrace
+            }
+
             t2.erase(itLRUValue);
             t2_key.remove(*itLRU);
-
-            // afterCacheTrace
-            PRINTV(AFTERCACHETRACE << "W " << *itLRU <<endl;);
-            // afterCacheTrace
         }
     }
 
@@ -327,4 +325,4 @@ private:
     key_to_value_type b2;
 };
 
-#endif //end lru_stl
+#endif //end arc
