@@ -117,6 +117,7 @@ public:
                         evcitedPageFromBlock++;
                     }
                 }
+                PRINTV(logfile << "evcitedPageFromBlock = " << evcitedPageFromBlock << endl;);
                 assert(evcitedPageFromBlock == maxNumber);
 
                 // clockHand will get evicted, we have to assign the next one in the CLOCK as the new clockHand

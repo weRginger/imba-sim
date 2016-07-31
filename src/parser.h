@@ -2,6 +2,6 @@
 #define PARSER
 #include <iostream>
 
-bool  getAndParseMSR(std::ifstream &inputTrace, reqAtom *newn);
+bool  getAndParseTrace(std::ifstream &inputTrace, char *traceName, reqAtom *newn);
 
 #endif

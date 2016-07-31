@@ -115,14 +115,12 @@ void	readTrace(deque<reqAtom> & memTrace)
     reqAtom newAtom;
     uint32_t lineNo = 0;
 
-    while(getAndParseMSR(_gConfiguration.traceStream , &newAtom)) {
+    while(getAndParseTrace(_gConfiguration.traceStream , _gConfiguration.traceName, &newAtom)) {
 
         ///cout<<"lineNo: "<<newAtom.lineNo<<" flags: "<<newAtom.flags<<" fsblkn: "<<newAtom.fsblkno<<" issueTime: "<<newAtom.issueTime<<" reqSize: "<<newAtom.reqSize<<endl;
 
         ///ziqi: if writeOnly is 1, only insert write cache miss page to cache
         if(_gConfiguration.writeOnly) {
-
-
 
             if(newAtom.flags & WRITE) {
 #ifdef REQSIZE
