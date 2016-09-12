@@ -10,31 +10,32 @@
 
 #include "lru.h"
 
+#include "hybrid-fixed.h"
+#include "hybrid-dynamic.h"
+#include "hybrid-lrulfu.h"
+#include "wn-rd-nd.h"
+#include "wn-rd-ad.h"
+#include "wd-rd-nd.h"
+#include "wd-rd-ad.h"
+
+/*
 #include "darcer.h"
 #include "harc.h"
 #include "arc.h"
 #include "lru-wsr.h"
-
 #include "fab++.h"
 #include "bplru.h"
 #include "lb-clock.h"
 #include "fab.h"
 
-/*
 #include "lb-arc.h"
 #include "clock.h"
 #include "car.h"
 #include "lb-car.h"
 #include "harc++.h"
 #include "arc++.h"
-#include "hybrid-fixed.h"
-#include "hybrid-dynamic.h"
 #include "hybrid-dynamic-withpcr.h"
-#include "hybrid-lrulfu.h"
-#include "wn-rd-nd.h"
-#include "wn-rd-ad.h"
-#include "wd-rd-nd.h"
-#include "wd-rd-ad.h"
+
 #include "min.h"
 #include "lru-dram.h"
 #include "lru_ziqi.h"
@@ -181,102 +182,102 @@ void	Initialize(int argc, char **argv, deque<reqAtom> & memTrace)
         if(_gConfiguration.GetAlgName(i).compare("lru") == 0) {
             _gTestCache[i] = new LRU<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
         }
-        else if(_gConfiguration.GetAlgName(i).compare("darcer") == 0) {
-            _gTestCache[i] = new DARCER<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+        else if(_gConfiguration.GetAlgName(i).compare("hybrid-fixed") == 0) {
+            _gTestCache[i] = new HybridFixed<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
         }
-        else if(_gConfiguration.GetAlgName(i).compare("h-arc") == 0) {
-            _gTestCache[i] = new HARC<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+        else if(_gConfiguration.GetAlgName(i).compare("hybrid-dynamic") == 0) {
+            _gTestCache[i] = new HybridDynamic<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
         }
-        else if(_gConfiguration.GetAlgName(i).compare("fab++") == 0) {
-            _gTestCache[i] = new FABPlusPlus<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], _gConfiguration.ssd2fsblkRatio[i], i);
+        else if(_gConfiguration.GetAlgName(i).compare("hybrid-lrulfu") == 0) {
+            _gTestCache[i] = new HybridLRULFU<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
         }
-        else if(_gConfiguration.GetAlgName(i).compare("lb-clock") == 0) {
-            _gTestCache[i] = new LBCLOCK<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], _gConfiguration.ssd2fsblkRatio[i], i);
+        else if(_gConfiguration.GetAlgName(i).compare("wnrdnd") == 0) {
+            _gTestCache[i] = new WNRDND<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
         }
-        else if(_gConfiguration.GetAlgName(i).compare("bplru") == 0) {
-            _gTestCache[i] = new BPLRU<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], _gConfiguration.ssd2fsblkRatio[i], i);
+        else if(_gConfiguration.GetAlgName(i).compare("wnrdad") == 0) {
+            _gTestCache[i] = new WNRDAD<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
         }
-        else if(_gConfiguration.GetAlgName(i).compare("fab") == 0) {
-            _gTestCache[i] = new FAB<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], _gConfiguration.ssd2fsblkRatio[i], i);
+        else if(_gConfiguration.GetAlgName(i).compare("wdrdnd") == 0) {
+            _gTestCache[i] = new WDRDND<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
         }
-        else if(_gConfiguration.GetAlgName(i).compare("arc") == 0) {
-            _gTestCache[i] = new ARC<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+        else if(_gConfiguration.GetAlgName(i).compare("wdrdad") == 0) {
+            _gTestCache[i] = new WDRDAD<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
         }
-        else if(_gConfiguration.GetAlgName(i).compare("lru-wsr") == 0) {
-            _gTestCache[i] = new LRUWSRCache<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-        }
-        /*
-        *else if(_gConfiguration.GetAlgName(i).compare("lb-arc") == 0) {
-          _gTestCache[i] = new LBARC<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], _gConfiguration.ssd2fsblkRatio[i], i);
-          }
-              else if(_gConfiguration.GetAlgName(i).compare("clock") == 0) {
-                  _gTestCache[i] = new CLOCK<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-              }
-              else if(_gConfiguration.GetAlgName(i).compare("car") == 0) {
-                  _gTestCache[i] = new CAR<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-              }
-                  else if(_gConfiguration.GetAlgName(i).compare("wnrdnd") == 0) {
-                      _gTestCache[i] = new WNRDND<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-                  }
-                  else if(_gConfiguration.GetAlgName(i).compare("wnrdad") == 0) {
-                      _gTestCache[i] = new WNRDAD<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-                  }
-                  else if(_gConfiguration.GetAlgName(i).compare("wdrdnd") == 0) {
-                      _gTestCache[i] = new WDRDND<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-                  }
-                  else if(_gConfiguration.GetAlgName(i).compare("wdrdad") == 0) {
-                      _gTestCache[i] = new WDRDAD<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-                  }
 
-              else if(_gConfiguration.GetAlgName(i).compare("harc") == 0) {
-              _gTestCache[i] = new HARC<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-              }
-              else if(_gConfiguration.GetAlgName(i).compare("pagemin") == 0) {
-              _gTestCache[i] = new PageMinCache(cacheAll, _gConfiguration.cacheSize[i], i);
-              }
-              else if(_gConfiguration.GetAlgName(i).compare("lru-dram") == 0) {
-              _gTestCache[i] = new LRU4DRAM<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-              }
-                  else if(_gConfiguration.GetAlgName(i).compare("hybrid-fixed") == 0) {
-                      _gTestCache[i] = new HybridFixed<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-                  }
-                  else if(_gConfiguration.GetAlgName(i).compare("hybrid-dynamic") == 0) {
-                      _gTestCache[i] = new HybridDynamic<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-                  }
-                  else if(_gConfiguration.GetAlgName(i).compare("hybrid-lrulfu") == 0) {
-                      _gTestCache[i] = new HybridLRULFU<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-                  }
-                  else if(_gConfiguration.GetAlgName(i).compare("hybrid-dynamic-withpcr") == 0) {
-                      _gTestCache[i] = new HybridDynamicWithPCR<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-                  }
-                  else if(_gConfiguration.GetAlgName(i).compare("iocache") == 0) {
-                      _gTestCache[i] = new IOCACHE<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-                  }
-                  else if(_gConfiguration.GetAlgName(i).compare("iocache-threshold") == 0) {
-                      _gTestCache[i] = new IOCACHE_THRESHOLD<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-                  }
-                  else if(_gConfiguration.GetAlgName(i).compare("darcest") == 0) {
-                      _gTestCache[i] = new DARCEST<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-                  }
-                  else if(_gConfiguration.GetAlgName(i).compare("cflru") == 0) {
-                      _gTestCache[i] = new CFLRU<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-                  }
-                  else if(_gConfiguration.GetAlgName(i).compare("blockmin") == 0) {
-                      _gTestCache[i] = new BlockMinCache(cacheAll, _gConfiguration.cacheSize[i], i);
-                  }
-                  else if(_gConfiguration.GetAlgName(i).compare("ziqilru") == 0) {
-                      _gTestCache[i] = new ZiqiLRUCache<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-                  }
-                  else if(_gConfiguration.GetAlgName(i).compare("dynamiclru") == 0) {
-                      _gTestCache[i] = new DynamicLRUCache<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-                  }
-                  else if(_gConfiguration.GetAlgName(i).compare("dynamicBlru") == 0) {
-                      _gTestCache[i] = new DynamicBLRUCache<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-                  }
-                  else if(_gConfiguration.GetAlgName(i).compare("nvm-dram") == 0) {
-                      _gTestCache[i] = new NVMDRAMCache<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-                  }
-                  */
+        /*
+            else if(_gConfiguration.GetAlgName(i).compare("darcer") == 0) {
+                _gTestCache[i] = new DARCER<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+            }
+            else if(_gConfiguration.GetAlgName(i).compare("h-arc") == 0) {
+                _gTestCache[i] = new HARC<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+            }
+            else if(_gConfiguration.GetAlgName(i).compare("fab++") == 0) {
+                _gTestCache[i] = new FABPlusPlus<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], _gConfiguration.ssd2fsblkRatio[i], i);
+            }
+            else if(_gConfiguration.GetAlgName(i).compare("lb-clock") == 0) {
+                _gTestCache[i] = new LBCLOCK<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], _gConfiguration.ssd2fsblkRatio[i], i);
+            }
+            else if(_gConfiguration.GetAlgName(i).compare("bplru") == 0) {
+                _gTestCache[i] = new BPLRU<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], _gConfiguration.ssd2fsblkRatio[i], i);
+            }
+            else if(_gConfiguration.GetAlgName(i).compare("fab") == 0) {
+                _gTestCache[i] = new FAB<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], _gConfiguration.ssd2fsblkRatio[i], i);
+            }
+            else if(_gConfiguration.GetAlgName(i).compare("arc") == 0) {
+                _gTestCache[i] = new ARC<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+            }
+            else if(_gConfiguration.GetAlgName(i).compare("lru-wsr") == 0) {
+                _gTestCache[i] = new LRUWSRCache<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+            }
+            else if(_gConfiguration.GetAlgName(i).compare("lb-arc") == 0) {
+                _gTestCache[i] = new LBARC<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], _gConfiguration.ssd2fsblkRatio[i], i);
+            }
+            else if(_gConfiguration.GetAlgName(i).compare("clock") == 0) {
+                _gTestCache[i] = new CLOCK<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+            }
+            else if(_gConfiguration.GetAlgName(i).compare("car") == 0) {
+                _gTestCache[i] = new CAR<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+            }
+            else if(_gConfiguration.GetAlgName(i).compare("harc") == 0) {
+                _gTestCache[i] = new HARC<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+            }
+            else if(_gConfiguration.GetAlgName(i).compare("pagemin") == 0) {
+                _gTestCache[i] = new PageMinCache(cacheAll, _gConfiguration.cacheSize[i], i);
+            }
+            else if(_gConfiguration.GetAlgName(i).compare("lru-dram") == 0) {
+                _gTestCache[i] = new LRU4DRAM<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+            }
+            else if(_gConfiguration.GetAlgName(i).compare("hybrid-dynamic-withpcr") == 0) {
+                _gTestCache[i] = new HybridDynamicWithPCR<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+            }
+            else if(_gConfiguration.GetAlgName(i).compare("iocache") == 0) {
+                _gTestCache[i] = new IOCACHE<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+            }
+            else if(_gConfiguration.GetAlgName(i).compare("iocache-threshold") == 0) {
+                _gTestCache[i] = new IOCACHE_THRESHOLD<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+            }
+            else if(_gConfiguration.GetAlgName(i).compare("darcest") == 0) {
+                _gTestCache[i] = new DARCEST<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+            }
+            else if(_gConfiguration.GetAlgName(i).compare("cflru") == 0) {
+                _gTestCache[i] = new CFLRU<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+            }
+            else if(_gConfiguration.GetAlgName(i).compare("blockmin") == 0) {
+                _gTestCache[i] = new BlockMinCache(cacheAll, _gConfiguration.cacheSize[i], i);
+            }
+            else if(_gConfiguration.GetAlgName(i).compare("ziqilru") == 0) {
+                _gTestCache[i] = new ZiqiLRUCache<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+            }
+            else if(_gConfiguration.GetAlgName(i).compare("dynamiclru") == 0) {
+                _gTestCache[i] = new DynamicLRUCache<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+            }
+            else if(_gConfiguration.GetAlgName(i).compare("dynamicBlru") == 0) {
+                _gTestCache[i] = new DynamicBLRUCache<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+            }
+            else if(_gConfiguration.GetAlgName(i).compare("nvm-dram") == 0) {
+                _gTestCache[i] = new NVMDRAMCache<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+            }
+        */
 
         //esle if //add new policy name and dynamic allocation here
         else {

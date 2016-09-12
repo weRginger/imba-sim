@@ -63,7 +63,7 @@ bool  getAndParseTrace(std::ifstream &inputTrace, char *traceName, reqAtom *newn
         // 	Timestamp        ,Hostname,DiskNumber,Type  ,Offset     ,Size,ResponseTime
         // 128166554283938750,wdev    ,3         ,Write ,3154152960,4096 ,   2170
         //if ( (foundRead!=std::string::npos) || (foundWrite!=std::string::npos) ) {
-	if ( NULL != strstr(traceName, "csv") ) {
+        if ( NULL != strstr(traceName, "csv") ) {
 
             ///ziqi: if it is the first line, denote its time stamp as base time. The following entry's time stamp need to be substracted by base time.
             if(lineno == 1) {
@@ -184,7 +184,7 @@ bool  getAndParseTrace(std::ifstream &inputTrace, char *traceName, reqAtom *newn
         // ASU, LBA,    Size, Opcode, Timestamp
         // 0,   657728, 8192, R,      0.011413
         //else if(foundComma!=std::string::npos) {
-	else if( NULL != strstr(traceName, "spc") ) {
+        else if( NULL != strstr(traceName, "spc") ) {
             newn->lineNo = lineno;
 
             fetched = 1;
@@ -276,13 +276,13 @@ bool  getAndParseTrace(std::ifstream &inputTrace, char *traceName, reqAtom *newn
             newn->lineNo = lineno;
 
             fetched = 1;
-	    
-	    newn->fsblkno = strtoull(tempchar, NULL, 10) ;
+
+            newn->fsblkno = strtoull(tempchar, NULL, 10) ;
 
             newn->reqSize = strtoull((strtok(NULL, " ,\t")) , NULL , 10) ;   // LBA
             newn->ssdblkno = newn->fsblkno / _gConfiguration.ssd2fsblkRatio[0];
-	    
-	    newn->flags = WRITE;
+
+            newn->flags = WRITE;
 
             ///ziqi: use line number as timestamp
             newn->issueTime = lineno;
@@ -295,13 +295,13 @@ bool  getAndParseTrace(std::ifstream &inputTrace, char *traceName, reqAtom *newn
             newn->lineNo = lineno;
 
             fetched = 1;
-	    
-	    strtok(NULL, " ,\t"); // step over timestamp
-	    strtok(NULL, " ,\t"); // step over executionTime
-	    strtok(NULL, " ,\t"); // step over diskNum
+
+            strtok(NULL, " ,\t"); // step over timestamp
+            strtok(NULL, " ,\t"); // step over executionTime
+            strtok(NULL, " ,\t"); // step over diskNum
 
             r_w = strtok(NULL, " ,\t"); // Read or Write?
-            assert(r_w != NULL);	    
+            assert(r_w != NULL);
             if(strcmp(r_w, "Write") == 0) {
                 newn->flags = WRITE;
             }
@@ -325,8 +325,8 @@ bool  getAndParseTrace(std::ifstream &inputTrace, char *traceName, reqAtom *newn
             newn->lineNo = lineno;
 
             fetched = 1;
-	    
-	    strtok(NULL, " ,"); // step over accessTime
+
+            strtok(NULL, " ,"); // step over accessTime
 
             r_w = strtok(NULL, " ,"); // Read or Write?
             assert(r_w != NULL);
