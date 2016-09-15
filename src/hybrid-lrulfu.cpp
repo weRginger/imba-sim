@@ -1,14 +1,7 @@
 //
-// C++ Implementation: hybrid
+// C++ Implementation: Original Hibachi algorithm once submitted to HotStorage2016
 //
-// Description:
-//
-//
-// Author: ziqi fan, UMN
-//
-// Copyright: See COPYING file that comes with this distribution
-// Copyright (c) 2010, Tim Day <timday@timday.com>
-//
+// Author: Ziqi Fan, UMN
 //
 #include "hybrid-lrulfu.h"
 

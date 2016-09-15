@@ -1,7 +1,8 @@
 //
-// C++ Implementation: Original Hibachi algorithm once submitted to HotStorage2016
+// C++ Implementation: Latest Hibachi algorithm combining idea with I/O-Cache
 //
 // Author: Ziqi Fan, UMN
+//
 
 #ifndef HybridLRULFU_H
 #define HybridLRULFU_H

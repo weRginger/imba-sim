@@ -1,11 +1,7 @@
 //
-// C++ Interface: hybrid
+// C++ Implementation: hybrid-fixed, dram used for read and nvram used for write
 //
-// Description: Cache policy for hybrid main memory using NVRAM and DRAM. It cannot self-adjust to workload
-//
-// Author: Ziqi Fan, (C) 2014
-//
-// Copyright: See COPYING file that comes with this distribution
+// Author: ziqi fan, UMN
 //
 
 #ifndef HybridFixed_H

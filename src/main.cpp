@@ -13,12 +13,14 @@
 #include "hybrid-fixed.h"
 #include "hybrid-dynamic.h"
 #include "hybrid-lrulfu.h"
+
+
+/*
 #include "wn-rd-nd.h"
 #include "wn-rd-ad.h"
 #include "wd-rd-nd.h"
 #include "wd-rd-ad.h"
 
-/*
 #include "darcer.h"
 #include "harc.h"
 #include "arc.h"
@@ -191,20 +193,20 @@ void	Initialize(int argc, char **argv, deque<reqAtom> & memTrace)
         else if(_gConfiguration.GetAlgName(i).compare("hybrid-lrulfu") == 0) {
             _gTestCache[i] = new HybridLRULFU<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
         }
-        else if(_gConfiguration.GetAlgName(i).compare("wnrdnd") == 0) {
-            _gTestCache[i] = new WNRDND<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-        }
-        else if(_gConfiguration.GetAlgName(i).compare("wnrdad") == 0) {
-            _gTestCache[i] = new WNRDAD<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-        }
-        else if(_gConfiguration.GetAlgName(i).compare("wdrdnd") == 0) {
-            _gTestCache[i] = new WDRDND<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-        }
-        else if(_gConfiguration.GetAlgName(i).compare("wdrdad") == 0) {
-            _gTestCache[i] = new WDRDAD<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-        }
 
         /*
+            else if(_gConfiguration.GetAlgName(i).compare("wnrdnd") == 0) {
+                _gTestCache[i] = new WNRDND<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+            }
+            else if(_gConfiguration.GetAlgName(i).compare("wnrdad") == 0) {
+                _gTestCache[i] = new WNRDAD<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+            }
+            else if(_gConfiguration.GetAlgName(i).compare("wdrdnd") == 0) {
+                _gTestCache[i] = new WDRDND<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+            }
+            else if(_gConfiguration.GetAlgName(i).compare("wdrdad") == 0) {
+                _gTestCache[i] = new WDRDAD<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+            }
             else if(_gConfiguration.GetAlgName(i).compare("darcer") == 0) {
                 _gTestCache[i] = new DARCER<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
             }

@@ -1,11 +1,7 @@
 //
-// C++ Interface: hybrid
+// C++ Implementation: hybrid-dynamic, nvram can be borrowed to cache clean pages
 //
-// Description: Cache policy for hybrid main memory using NVRAM and DRAM. It can self-adjust to workload based on DARC
-//
-// Author: Ziqi Fan, (C) 2014
-//
-// Copyright: See COPYING file that comes with this distribution
+// Author: ziqi fan, UMN
 //
 
 #ifndef HybridDynamic_H
