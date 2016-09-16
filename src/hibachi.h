@@ -26,10 +26,6 @@ extern int writeHitOnClean;
 
 extern int dirtyPageInCache;
 
-extern double priceDvsN;
-
-extern double moneyAllo4D;
-
 extern int nvramSize;
 
 extern int readHitOnNVRAM;
@@ -46,11 +42,9 @@ public:
     // Key access history, most recent at back
     typedef list<K> key_tracker_type;
     // Key to value and key history iterator
-    typedef map
-    < K, pair<V, typename key_tracker_type::iterator> > 	key_to_value_type;
+    typedef map< K, pair<V, typename key_tracker_type::iterator> > key_to_value_type;
 
-    typedef map
-    < long long, int > 	key_to_value_type_frequencyList;
+    typedef map< long long, int > key_to_value_type_frequencyList;
 
     // Constuctor specifies the cached function and
     // the maximum number of records to be stored.
@@ -67,7 +61,7 @@ public:
         int NVM_capacity = nvramSize;
 
         PRINTV(logfile << endl;);
-        ///ziqi: p denotes the length of t1 and (_capacity - p) denotes the lenght of t2
+        // p denotes the length of t1 and (_capacity - p) denotes the lenght of t2
         static int p=0;
 
         assert((t1a.size() + t1b.size() + t2.size()) <= ((unsigned)NVM_capacity+DRAM_capacity));
@@ -75,17 +69,16 @@ public:
         assert(t2.size() <= (unsigned)NVM_capacity);
         assert(t1b.size() <= (unsigned)NVM_capacity);
         assert(t1a.size() <= DRAM_capacity);
-        ///assert((t1a.size() + t1b.size() + b1.size()) <= ((unsigned)NVM_capacity+DRAM_capacity));
         assert((t2.size() + b2.size()) <= 2*((unsigned)NVM_capacity+DRAM_capacity));
         assert(_capacity != 0);
+
         PRINTV(logfile << "Access key: " << k << endl;);
 
         if ((t1a.size() + t1b.size() + b1.size()) > ((unsigned)NVM_capacity+DRAM_capacity)) {
-
-            ///find the least frequency in fList
-            ///store the least frequency in fList
+            // find the least frequency in fList
+            // store the least frequency in fList
             int leastFrequency_tmp = 9999999;
-            ///store the key of least frequency in fList
+            // store the key of least frequency in fList
             long long leastFrequencyKey_tmp = 0;
 
             ///evcit LFU page of b1
@@ -846,15 +839,15 @@ public:
                     assert(t2.size()+t1b.size() < (unsigned)NVM_capacity);
                     t2.insert(make_pair(k, make_pair(v, itNew)));
 
-                    ///create an item in fList
-                    fList.insert(make_pair(k, 1));
+                    // create an item in fList
+                    fList.insert(make_pair(k, 0));
 
                     PRINTV(logfile << "Case V insert dirty key to t2: " << k << "++frequency: " << fList.find(k)->second << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
 
                 }
-                ///NVRAM is full
+                // NVRAM is full
                 else {
-                    ///NVRAM is filled with dirty pages
+                    // NVRAM is filled with dirty pages
                     if(t2.size() == (unsigned)NVM_capacity) {
                         PRINTV(logfile << "Case V, write miss and NVRAM is full, t2.size() == NVRAM: " << k << endl;);
                         ///select the LRU page of t2
@@ -884,7 +877,7 @@ public:
                         t2.insert(make_pair(k, make_pair(v, itNew)));
 
                         ///create an item in fList
-                        fList.insert(make_pair(k, 1));
+                        fList.insert(make_pair(k, 0));
 
                         PRINTV(logfile << "Case V insert a dirty page to t2: " << k << "++frequency: " << fList.find(k)->second<< "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
                     }
@@ -913,7 +906,7 @@ public:
                         t2.insert(make_pair(k, make_pair(v, itNew)));
 
                         ///create an item in fList
-                        fList.insert(make_pair(k, 1));
+                        fList.insert(make_pair(k, 0));
 
                         PRINTV(logfile << "Case V insert a dirty page to t2: " << k << "++frequency: " << fList.find(k)->second << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
                     }
