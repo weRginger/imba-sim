@@ -43,8 +43,7 @@ public:
     typedef map
     < K, pair<V, typename key_tracker_type::iterator> > 	key_to_value_type;
 
-    typedef map
-    < int, int > 	key_to_value_type_seqList;
+    typedef map<int, int > key_to_value_type_seqList;
 // Constuctor specifies the cached function and
 // the maximum number of records to be stored.
     IOCACHE_THRESHOLD(

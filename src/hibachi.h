@@ -42,9 +42,11 @@ public:
     // Key access history, most recent at back
     typedef list<K> key_tracker_type;
     // Key to value and key history iterator
-    typedef map< K, pair<V, typename key_tracker_type::iterator> > key_to_value_type;
+    typedef map<K, pair<V, typename key_tracker_type::iterator>> key_to_value_type;
 
-    typedef map< long long, int > key_to_value_type_frequencyList;
+    typedef map<long long, int> key_to_value_type_frequencyList;
+
+    typedef map<int, int> key_to_value_type_seqList;
 
     // Constuctor specifies the cached function and
     // the maximum number of records to be stored.
@@ -81,8 +83,8 @@ public:
             // store the key of least frequency in fList
             long long leastFrequencyKey_tmp = 0;
 
-            ///evcit LFU page of b1
-            ///check starting from MRU position of b1, select the least frequency one, if tie, select the one near LRU position
+            // evcit LFU page of b1
+            // check starting from MRU position of b1, select the least frequency one, if tie, select the one near LRU position
             typename key_tracker_type::iterator itMRU = b1_key.end();
             itMRU--;
             while(itMRU != b1_key.begin()) {
@@ -109,7 +111,7 @@ public:
             assert(it_b1_tmp != b1.end());
             b1.erase(it_b1_tmp);
             b1_key.remove(leastFrequencyKey_tmp);
-            ///evict LFU page of b1 from fList
+            // evict LFU page of b1 from fList
             fList.erase(leastFrequencyKey_tmp);
 
             PRINTV(logfile << "Make sure (t1a.size() + t1b.size() + b1.size()) <= _capacity evicts LFU page from b1: " << leastFrequencyKey_tmp << "++frequency: " << fList.find(leastFrequencyKey_tmp)->second << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
@@ -123,11 +125,11 @@ public:
         const typename key_to_value_type::iterator it_t2	= t2.find(k);
         const typename key_to_value_type::iterator it_b1	= b1.find(k);
         const typename key_to_value_type::iterator it_b2	= b2.find(k);
-        //const typename key_to_value_type::iterator itNew	= _key_to_value.find(k);
+
         ///*************************************************************************************************
-        ///ziqi: HYBRID-LRULFU Case I: x hit in t2
+        // Hibachi Case I: x hit in t2
         if(it_t2 != t2.end()) {
-            ///ziqi: if it is a write request, move x to MRU of t2 w/o frequency increasing
+            // if it is a write request, move x to MRU of t2 w/o frequency increasing
             if(status & WRITE) {
                 PRINTV(logfile << "Case I write hit on t2 with key: " << k <<endl;);
                 t2.erase(it_t2);
@@ -142,7 +144,7 @@ public:
                 t2.insert(make_pair(k, make_pair(v, itNew)));
                 PRINTV(logfile << "Case I write hit move to MRU of t2: " << k << "++frequency: " << fList.find(k)->second << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
             }
-            ///ziqi: if it is a read request, only increase frequency
+            // if it is a read request, only increase frequency
             else {
                 PRINTV(logfile << "Case I read hit on t2 with key: " << k <<endl;);
 
@@ -159,7 +161,7 @@ public:
             return (status | PAGEHIT | BLKHIT);
         }
         ///*************************************************************************************************
-        ///ziqi: HYBRID-LRULFU Case II: x hit in t1
+        // Hibachi Case II: x hit in t1
         else if((it_t1a != t1a.end()) || (it_t1b != t1b.end())) {
             assert(!((it_t1a != t1a.end()) && (it_t1b != t1b.end())));
             ///ziqi: if it is a write request
@@ -181,6 +183,9 @@ public:
                         // linked to the usage record.
                         assert(t1b.size() + t2.size() < (unsigned)NVM_capacity);
                         t2.insert(make_pair(k, make_pair(v, itNew)));
+
+                        seqListInsert(k);
+
                         PRINTV(logfile << "Case II insert dirty key to t2: " << k << "++frequency: " << fList.find(k)->second << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
                     }
                     // NVRAM is full
@@ -204,6 +209,9 @@ public:
                             ///evict and flush LRU page of t2
                             t2.erase(it);
                             t2_key.remove(*itLRU);
+
+                            seqListEvict(*itLRU);
+
                             PRINTV(logfile << "Case II (NVRAM is filled with dirty pages) evicting t2 and flushing back " << *itLRU << "++frequency: " << fList.find(*itLRU)->second << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
                             totalPageWriteToStorage++;
                         }
@@ -221,8 +229,8 @@ public:
                             t1b.erase(it_t1b_tmp);
                             PRINTV(logfile << "Case II migrate clean page from t1b to t1a: " << it_t1b_tmp->first << "++frequency: " << fList.find(it_t1b_tmp->first)->second << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
                         }
-                        ///finally
-                        ///migrate the hitted page to MRU of t2
+                        // finally
+                        // migrate the hitted page to MRU of t2
                         // Record k as most-recently-used key
                         typename key_tracker_type::iterator itNew = t2_key.insert(t2_key.end(), k);
                         // Create the key-value entry,
@@ -230,12 +238,15 @@ public:
                         assert(t2.size()+t1b.size() < (unsigned)NVM_capacity);
                         const V v = _fn(k, value);
                         t2.insert(make_pair(k, make_pair(v, itNew)));
+
+                        seqListInsert(k);
+
                         PRINTV(logfile << "Case II insert dirty key to t2: " << k << "** t1a size: "<< t1a.size()<<", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
                     }
                 }
                 if(it_t1b != t1b.end()) {
                     PRINTV(logfile << "Case II Write hit on t1b " << k << endl;);
-                    ///evict from t1b
+                    // evict from t1b
                     t1b.erase(it_t1b);
                     t1_key.remove(k);
 
@@ -246,10 +257,13 @@ public:
                     // linked to the usage record.
                     assert(t2.size()+t1b.size() < (unsigned)NVM_capacity);
                     t2.insert(make_pair(k, make_pair(v_2, itNew)));
+
+                    seqListInsert(k);
+
                     PRINTV(logfile << "Case II insert dirty key to t2: " << k << "++frequency: " << fList.find(k)->second << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
                 }
             }
-            ///hit on t1a or t1b, and it is a read request
+            // hit on t1a or t1b, and it is a read request
             else {
                 if(it_t1a != t1a.end()) {
                     PRINTV(logfile << "Case II Read hit on t1a " << k << endl;);
@@ -307,7 +321,7 @@ public:
             return (status | PAGEHIT | BLKHIT);
         }
         ///*************************************************************************************************
-        ///ziqi: HYBRID-LRULFU Case III: x hit in b1, then enlarge t1, and move x from b1 to t1 if it's a read or to t2 if it's a write
+        // Hibachi Case III: x hit in b1, then enlarge t1, and move x from b1 to t1 if it's a read or to t2 if it's a write
         else if(it_b1 != b1.end()) {
             ///ziqi: delta denotes the step in each ADAPTATION
             int delta;
@@ -342,10 +356,10 @@ public:
             b1_key.remove(k);
             PRINTV(logfile << "Case III evicts b1 " << k <<  endl;);
 
-            ///ziqi: if it is a write request
+            // if it is a write request
             if(status & WRITE) {
                 PRINTV(logfile << "Case III write Hit on b1: " << k << endl;);
-                ///E&B function must have cleaned a space in t1a instead of t1b, so we need to move a page from t1b to t1a
+                // E&B function must have cleaned a space in t1a instead of t1b, so we need to move a page from t1b to t1a
                 if(t2.size()+t1b.size() == (unsigned)NVM_capacity) {
                     typename key_to_value_type::iterator it_t1b_tmp = t1b.begin();
                     assert(it_t1b_tmp != t1b.end());
@@ -365,14 +379,17 @@ public:
                 // linked to the usage record.
                 assert(t2.size()+t1b.size() < (unsigned)NVM_capacity);
                 t2.insert(make_pair(k, make_pair(v, itNew)));
+
+                seqListInsert(k);
+
                 PRINTV(logfile << "Case III insert a dirty page to t2: " << k << "++frequency: " << fList.find(k)->second << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
             }
-            ///ziqi: if it is a read request
+            // if it is a read request
             else {
                 PRINTV(logfile << "Case III read Hit on b1: " << k << endl;);
-                ///if t1a has space left, always insert clean page to it first
+                // if t1a has space left, always insert clean page to it first
                 if(t1a.size()<DRAM_capacity) {
-                    ///increase frequency by 1
+                    // increase frequency by 1
                     typename key_to_value_type_frequencyList::iterator itfList = fList.find(k);
                     assert(itfList != fList.end() );
                     if(itfList != fList.end()) {
@@ -388,9 +405,9 @@ public:
 
                     PRINTV(logfile << "Case III insert a clean page to t1a: " << k << "++frequency: " << fList.find(k)->second << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
                 }
-                ///if t1a has no space left, use the space in NVRAM for clean, which is t1b
+                // if t1a has no space left, use the space in NVRAM for clean, which is t1b
                 else {
-                    ///increase frequency by 1
+                    // increase frequency by 1
                     typename key_to_value_type_frequencyList::iterator itfList = fList.find(k);
                     assert(itfList != fList.end() );
                     if(itfList != fList.end()) {
@@ -408,8 +425,8 @@ public:
 
                 if(t1a.size() + t1b.size() + b1.size() > ((unsigned)NVM_capacity+DRAM_capacity)) {
                     if(b1.size() > 0) {
-                        ///find the least frequency in fList
-                        ///store the least frequency in fList
+                        // find the least frequency in fList
+                        // store the least frequency in fList
                         int leastFrequency = 9999999;
                         ///store the key of least frequency in fList
                         long long leastFrequencyKey = 0;
@@ -437,24 +454,24 @@ public:
 
                         PRINTV(logfile << "leastFrequencyKey: " << leastFrequencyKey << ", leastFrequency: " << leastFrequency << endl;);
 
-                        ///evcit LFU page of b1
+                        // evcit LFU page of b1
                         typename key_to_value_type::iterator it_b1_tmp	= b1.find(leastFrequencyKey);
                         assert(it_b1_tmp != b1.end() );
                         b1.erase(it_b1_tmp);
                         b1_key.remove(leastFrequencyKey);
-                        ///evict LFU page of b1 from fList
+                        // evict LFU page of b1 from fList
                         fList.erase(leastFrequencyKey);
 
                         PRINTV(logfile << "Case III evicts LFU page from b1: " << leastFrequencyKey << "++frequency: " << fList.find(leastFrequencyKey)->second << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
                     }
                     else {
-                        ///find the least frequency in fList
-                        ///store the least frequency in fList
+                        // find the least frequency in fList
+                        // store the least frequency in fList
                         int leastFrequency = 9999999;
-                        ///store the key of least frequency in fList
+                        // store the key of least frequency in fList
                         long long leastFrequencyKey = 0;
 
-                        ///check starting from MRU position of t1, select the least frequency one, if tie, select the one near LRU position
+                        // check starting from MRU position of t1, select the least frequency one, if tie, select the one near LRU position
                         typename key_tracker_type::iterator itMRU = t1_key.end();
                         itMRU--;
                         while(itMRU != t1_key.begin()) {
@@ -481,10 +498,10 @@ public:
 
                         if(it_t1a_tmp != t1a.end()) {
                             assert(it_t1b_tmp == t1b.end());
-                            ///evcit LFU page of t1a
+                            // evcit LFU page of t1a
                             t1a.erase(it_t1a_tmp);
                             t1_key.remove(leastFrequencyKey);
-                            ///evict LFU page of b1 from fList
+                            // evict LFU page of b1 from fList
                             fList.erase(leastFrequencyKey);
 
                             PRINTV(logfile << "Case III evicts LFU page from t1a: " << leastFrequencyKey << "++frequency: " << fList.find(leastFrequencyKey)->second<< "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
@@ -492,10 +509,10 @@ public:
 
                         if(it_t1b_tmp != t1b.end()) {
                             assert(it_t1a_tmp == t1a.end());
-                            ///evcit LFU page of t1b
+                            // evcit LFU page of t1b
                             t1b.erase(it_t1b_tmp);
                             t1_key.remove(leastFrequencyKey);
-                            ///evict LFU page of b1 from fList
+                            // evict LFU page of b1 from fList
                             fList.erase(leastFrequencyKey);
 
                             PRINTV(logfile << "Case III evicts LFU page from t1b: " << leastFrequencyKey << "++frequency: " << fList.find(leastFrequencyKey)->second << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
@@ -506,9 +523,9 @@ public:
             return (status | PAGEMISS);
         }
         ///*************************************************************************************************
-        ///ziqi: HYBRID-LRULFU Case IV: x hit in b2, then enlarge t2, and move x from b2 to t1 if it's a read or to t2 if it's a write
+        // Hibachi Case IV: x hit in b2, then enlarge t2, and move x from b2 to t1 if it's a read or to t2 if it's a write
         else if(it_b2 != b2.end()) {
-            ///ziqi: delta denotes the step in each ADAPTATION
+            // delta denotes the step in each ADAPTATION
             int delta;
 
             PRINTV(logfile << "Case IV Hit on b2: " << k << endl;);
@@ -535,18 +552,18 @@ public:
 
             const V v = _fn(k, value);
 
-            ///E&B
+            // E&B
             REPLACE(k, v, p, status);
 
             b2.erase(it_b2);
             b2_key.remove(k);
             PRINTV(logfile << "Case IV evicts b2 " << k <<  endl;);
 
-            ///ziqi: if it is a write request
+            // if it is a write request
             if(status & WRITE) {
                 PRINTV(logfile << "Case IV write Hit on b2: " << k << endl;);
                 // Record k as most-recently-used key
-                ///E&B function must have cleaned a space in t1a instead of t1b, so we need to move a page from t1b to t1a
+                // E&B function must have cleaned a space in t1a instead of t1b, so we need to move a page from t1b to t1a
                 if(t2.size()+t1b.size() == (unsigned)NVM_capacity) {
                     typename key_to_value_type::iterator it_t1b_tmp = t1b.begin();
                     assert(it_t1b_tmp != t1b.end());
@@ -564,14 +581,17 @@ public:
                 // linked to the usage record.
                 assert(t2.size()+t1b.size() < (unsigned)NVM_capacity);
                 t2.insert(make_pair(k, make_pair(v, itNew)));
+
+                seqListInsert(k);
+
                 PRINTV(logfile << "Case IV insert a dirty page to t2: " << k << "++frequency: " << fList.find(k)->second << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
             }
-            ///ziqi: if it is a read request
+            // if it is a read request
             else {
                 PRINTV(logfile << "Case IV read Hit on b2: " << k << endl;);
-                ///if t1a has space left, always insert clean page to it first
+                // if t1a has space left, always insert clean page to it first
                 if(t1a.size()<DRAM_capacity) {
-                    ///increase frequency by 1
+                    // increase frequency by 1
                     typename key_to_value_type_frequencyList::iterator itfList = fList.find(k);
                     if(itfList != fList.end()) {
                         itfList->second = itfList->second+1;
@@ -586,9 +606,9 @@ public:
                     t1a.insert(make_pair(k, make_pair(v, itNew)));
                     PRINTV(logfile << "Case IV insert key to t1a: " << k << "++frequency: " << fList.find(k)->second << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
                 }
-                ///if t1a has no space left, use the space in NVRAM for clean, which is t1b
+                // if t1a has no space left, use the space in NVRAM for clean, which is t1b
                 else {
-                    ///increase frequency by 1
+                    // increase frequency by 1
                     typename key_to_value_type_frequencyList::iterator itfList = fList.find(k);
                     assert(itfList != fList.end() );
                     if(itfList != fList.end()) {
@@ -606,13 +626,13 @@ public:
 
                 if(t1a.size() + t1b.size() + b1.size() > ((unsigned)NVM_capacity+DRAM_capacity)) {
                     if(b1.size() > 0) {
-                        ///find the least frequency in fList
-                        ///store the least frequency in fList
+                        // find the least frequency in fList
+                        // store the least frequency in fList
                         int leastFrequency = 9999999;
-                        ///store the key of least frequency in fList
+                        // store the key of least frequency in fList
                         long long leastFrequencyKey = 0;
 
-                        ///check starting from MRU position of b1, select the least frequency one, if tie, select the one near LRU position
+                        // check starting from MRU position of b1, select the least frequency one, if tie, select the one near LRU position
                         typename key_tracker_type::iterator itMRU = b1_key.end();
                         itMRU--;
                         while(itMRU != b1_key.begin()) {
@@ -635,12 +655,12 @@ public:
 
                         PRINTV(logfile << "leastFrequencyKey: " << leastFrequencyKey << ", leastFrequency: " << leastFrequency << endl;);
 
-                        ///evcit LFU page of b1
+                        // evcit LFU page of b1
                         typename key_to_value_type::iterator it_b1_tmp	= b1.find(leastFrequencyKey);
                         assert(it_b1_tmp != b1.end() );
                         b1.erase(it_b1_tmp);
                         b1_key.remove(leastFrequencyKey);
-                        ///evict LFU page of b1 from fList
+                        // evict LFU page of b1 from fList
                         fList.erase(leastFrequencyKey);
 
                         PRINTV(logfile << "Case IV evicts LFU page from b1: " << leastFrequencyKey << "++frequency: " << fList.find(leastFrequencyKey)->second << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
@@ -704,20 +724,20 @@ public:
             return (status | PAGEMISS);
         }
         ///*************************************************************************************************
-        ///ziqi: HYBRID-LRULFU Case V: x is cache miss
+        // Hibachi Case V: x is cache miss
         else {
             PRINTV(logfile << "Case V miss on key: " << k << endl;);
 
             if((t1a.size() + t1b.size() + b1.size()) == ((unsigned)NVM_capacity+DRAM_capacity)) {
                 ///b1 is not empty
                 if(t1a.size() + t1b.size() < ((unsigned)NVM_capacity+DRAM_capacity)) {
-                    ///find the least frequency in fList
-                    ///store the least frequency in fList
+                    // find the least frequency in fList
+                    // store the least frequency in fList
                     int leastFrequency = 9999999;
-                    ///store the key of least frequency in fList
+                    // store the key of least frequency in fList
                     long long leastFrequencyKey = 0;
 
-                    ///check starting from MRU position of b1, select the least frequency one, if tie, select the one near LRU position
+                    // check starting from MRU position of b1, select the least frequency one, if tie, select the one near LRU position
                     typename key_tracker_type::iterator itMRU = b1_key.end();
                     itMRU--;
                     while(itMRU != b1_key.begin()) {
@@ -827,17 +847,20 @@ public:
                 }
             }
             const V v = _fn(k, value);
-            ///write request
+
+            // write request
             if(status & WRITE) {
                 // Record k as most-recently-used key
                 typename key_tracker_type::iterator itNew = t2_key.insert(t2_key.end(), k);
-                ///NVRAM is not full
+                // NVRAM is not full
                 if(t1b.size() + t2.size() < (unsigned)NVM_capacity) {
                     PRINTV(logfile << "Case V, write miss and NVRAM not full: " << k << endl;);
                     // Create the key-value entry,
                     // linked to the usage record.
                     assert(t2.size()+t1b.size() < (unsigned)NVM_capacity);
                     t2.insert(make_pair(k, make_pair(v, itNew)));
+
+                    seqListInsert(k);
 
                     // create an item in fList
                     fList.insert(make_pair(k, 0));
@@ -865,6 +888,9 @@ public:
                         ///flush back and evcit the LRU page of t2
                         t2.erase(it);
                         t2_key.remove(*itLRU);
+
+                        seqListEvict(*itLRU);
+
                         PRINTV(logfile << "Case V (NVM is filled with dirty pages) evicts and flushes a dirty page " << *itLRU << "++frequency: " << fList.find(*itLRU)->second << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
                         totalPageWriteToStorage++;
 
@@ -875,6 +901,8 @@ public:
                         // linked to the usage record.
                         assert(t2.size()+t1b.size() < (unsigned)NVM_capacity);
                         t2.insert(make_pair(k, make_pair(v, itNew)));
+
+                        seqListInsert(k);
 
                         ///create an item in fList
                         fList.insert(make_pair(k, 0));
@@ -905,6 +933,8 @@ public:
                         assert(t2.size()+t1b.size() < (unsigned)NVM_capacity);
                         t2.insert(make_pair(k, make_pair(v, itNew)));
 
+                        seqListInsert(k);
+
                         ///create an item in fList
                         fList.insert(make_pair(k, 0));
 
@@ -912,7 +942,7 @@ public:
                     }
                 }
             }
-            ///read request
+            // read request
             else {
                 // Record k as most-recently-used key
                 typename key_tracker_type::iterator itNew = t1_key.insert(t1_key.end(), k);
@@ -923,7 +953,7 @@ public:
                     assert(t1a.size() < DRAM_capacity);
                     t1a.insert(make_pair(k, make_pair(v, itNew)));
 
-                    ///create an item in fList
+                    // create an item in fList
                     fList.insert(make_pair(k, 1));
 
                     PRINTV(logfile << "Case V insert a clean page to t1a: " << k << "++frequency: " << fList.find(k)->second << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
@@ -933,7 +963,7 @@ public:
                     assert(t2.size()+t1b.size() < (unsigned)NVM_capacity);
                     t1b.insert(make_pair(k, make_pair(v, itNew)));
 
-                    ///create an item in fList
+                    // create an item in fList
                     fList.insert(make_pair(k, 1));
 
                     PRINTV(logfile << "Case V insert a clean page to t1b: " << k << "++frequency: " << fList.find(k)->second << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
@@ -941,15 +971,15 @@ public:
             }
             return (status | PAGEMISS);
         }
-        ///should never reach here
+        // should never reach here
         assert(0);
         return 0;
-    } //end operator access
+    } // end operator access
 
     ///*************************************************************************************************
-    ///ziqi: HYBRID-LRULFU subroutine
+    // Hibachi subroutine
     void REPLACE(const K &k, const V &v, int p, uint32_t status) {
-        ///REPLACE can only be triggered only if both NVRAM and DRAM are full
+        // REPLACE can only be triggered only if both NVRAM and DRAM are full
         size_t DRAM_capacity = (size_t)_capacity;
         int NVM_capacity = nvramSize;
         assert(t1a.size() + t1b.size() + t2.size() == ((unsigned)NVM_capacity+DRAM_capacity));
@@ -958,19 +988,19 @@ public:
 
         PRINTV(logfile << "REPLACE begins" << endl;);
         typename key_to_value_type::iterator it = b2.find(k);
-        ///evict from clean cache side
+        // evict from clean cache side
         if((t1a.size()+t1b.size() > 0) && ( (t1a.size() + t1b.size() > unsigned(p) ) || ((it != b2.end()) && (t1a.size() + t1b.size() == unsigned(p))))) {
             PRINTV(logfile << "REPLACE from clean page cache" << endl;);
             typename key_tracker_type::iterator itLRU = t1_key.begin();
             assert(itLRU != t1_key.end());
 
-            ///find the least frequency in fList
-            ///store the least frequency in fList
+            // find the least frequency in fList
+            // store the least frequency in fList
             int leastFrequency = 9999999;
-            ///store the key of least frequency in fList
+            // store the key of least frequency in fList
             long long leastFrequencyKey = 0;
 
-            ///check starting from MRU position of t1, select the least frequency one, if tie, select the one near LRU position
+            // check starting from MRU position of t1, select the least frequency one, if tie, select the one near LRU position
             typename key_tracker_type::iterator itMRU = t1_key.end();
             itMRU--;
             while(itMRU != t1_key.begin()) {
@@ -999,13 +1029,13 @@ public:
             if(it_t1a_tmp != t1a.end()) {
                 assert(it_t1b_tmp == t1b.end());
 
-                ///insert LFU page of t1 to MRU of b1
+                // insert LFU page of t1 to MRU of b1
                 typename key_tracker_type::iterator itNew = b1_key.insert(b1_key.end(), leastFrequencyKey);
                 const V v_tmp = _fn(leastFrequencyKey, it_t1a_tmp->second.first);
                 b1.insert(make_pair(leastFrequencyKey, make_pair(v_tmp, itNew)));
                 PRINTV(logfile << "Case REPLACE insert LFU page of t1a to b1: " << leastFrequencyKey << "++frequency: " << fList.find(leastFrequencyKey)->second << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
 
-                ///evcit LFU page of t1a
+                // evcit LFU page of t1a
                 t1a.erase(it_t1a_tmp);
                 t1_key.remove(leastFrequencyKey);
 
@@ -1015,13 +1045,13 @@ public:
             if(it_t1b_tmp != t1b.end()) {
                 assert(it_t1a_tmp == t1a.end());
 
-                ///insert LFU page of t1 to MRU of b1
+                // insert LFU page of t1 to MRU of b1
                 typename key_tracker_type::iterator itNew = b1_key.insert(b1_key.end(), leastFrequencyKey);
                 const V v_tmp = _fn(leastFrequencyKey, it_t1b_tmp->second.first);
                 b1.insert(make_pair(leastFrequencyKey, make_pair(v_tmp, itNew)));
                 PRINTV(logfile << "Case REPLACE insert LFU page of t1b to b1: " << leastFrequencyKey << "++frequency: " << fList.find(leastFrequencyKey)->second << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
 
-                ///evcit LFU page of t1b
+                // evcit LFU page of t1b
                 t1b.erase(it_t1b_tmp);
                 t1_key.remove(leastFrequencyKey);
 
@@ -1031,26 +1061,26 @@ public:
             if( (status & WRITE) && (t2.size() == (unsigned)NVM_capacity) ) {
                 assert(t1b.size() == 0);
 
-                ///select the LRU page of t2
+                // select the LRU page of t2
                 typename key_tracker_type::iterator itLRU = t2_key.begin();
                 assert(itLRU != t2_key.end());
                 typename key_to_value_type::iterator it = t2.find(*itLRU);
                 assert(it != t2.end());
-                ///insert LRU page of t2 to LRU of t1a
+                // insert LRU page of t2 to LRU of t1a
                 typename key_tracker_type::iterator itNewTmp = t1_key.insert(t1_key.begin(), *itLRU);
                 // Create the key-value entry,
                 // linked to the usage record.
                 const V v_tmp = _fn(*itLRU, it->second.first);
                 assert(t1a.size() < DRAM_capacity);
                 t1a.insert(make_pair(*itLRU, make_pair(v_tmp, itNewTmp)));
-                ///flush back and evcit the LRU page of t2
+                // flush back and evcit the LRU page of t2
                 t2.erase(it);
                 t2_key.remove(*itLRU);
                 PRINTV(logfile << "Case REPLACE (NVM is filled with dirty pages) evicts and flushes a dirty page " << *itLRU << "++frequency: " << fList.find(*itLRU)->second << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
                 totalPageWriteToStorage++;
             }
         }
-        ///evcit from dirty cache side
+        // evcit from dirty cache side
         else {
             PRINTV(logfile << "REPLACE from dirty page cache" << endl;);
             /*
@@ -1064,13 +1094,13 @@ public:
                       */
 
 
-            ///find the least frequency in fList
-            ///store the least frequency in fList
+            // find the least frequency in fList
+            // store the least frequency in fList
             int leastFrequency = 9999999;
-            ///store the key of least frequency in fList
+            // store the key of least frequency in fList
             long long leastFrequencyKey = 0;
 
-            ///check starting from MRU position of t1, select the least frequency one, if tie, select the one near LRU position
+            // check starting from MRU position of t1, select the least frequency one, if tie, select the one near LRU position
             typename key_tracker_type::iterator itMRU = t1_key.end();
             itMRU--;
             while(itMRU != t1_key.begin()) {
@@ -1093,7 +1123,7 @@ public:
 
             PRINTV(logfile << "leastFrequencyKey: " << leastFrequencyKey << ", leastFrequency: " << leastFrequency << endl;);
 
-            ///find the LRU page of t2 and its frequency
+            // find the LRU page of t2 and its frequency
             typename key_tracker_type::iterator itLRU_t2 = t2_key.begin();
             typename key_to_value_type::iterator it_t2_tmp	= t2.find(*itLRU_t2);
             assert(it_t2_tmp != t2.end() );
@@ -1101,7 +1131,7 @@ public:
             assert(itfList != fList.end() );
             int fLRU_t2 = itfList->second;
 
-            ///frequency of LRU page of t2 is bigger than LFU of t1
+            // frequency of LRU page of t2 is bigger than LFU of t1
             if(fLRU_t2 > leastFrequency) {
                 typename key_to_value_type::iterator it_t1a_tmp	= t1a.find(leastFrequencyKey);
                 typename key_to_value_type::iterator it_t1b_tmp	= t1b.find(leastFrequencyKey);
@@ -1109,24 +1139,24 @@ public:
                 if(it_t1a_tmp != t1a.end()) {
                     assert(it_t1b_tmp == t1b.end());
 
-                    ///insert LFU page of t1 to MRU of b1
+                    // insert LFU page of t1 to MRU of b1
                     typename key_tracker_type::iterator itNew = b1_key.insert(b1_key.end(), leastFrequencyKey);
                     const V v_tmp = _fn(leastFrequencyKey, it_t1a_tmp->second.first);
                     b1.insert(make_pair(leastFrequencyKey, make_pair(v_tmp, itNew)));
                     PRINTV(logfile << "Case REPLACE insert LFU page of t1a to b1: " << leastFrequencyKey << "++frequency: " << fList.find(leastFrequencyKey)->second << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
 
-                    ///evcit LFU page of t1a
+                    // evcit LFU page of t1a
                     t1a.erase(it_t1a_tmp);
                     t1_key.remove(leastFrequencyKey);
 
                     PRINTV(logfile << "Case REPLACE evicts LFU page from t1a: " << leastFrequencyKey << "++frequency: " << fList.find(leastFrequencyKey)->second << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
 
-                    ///insert LRU page of t2 to t1a
+                    // insert LRU page of t2 to t1a
                     itNew = t1_key.insert(t1_key.end(), *itLRU_t2);
                     const V v_tmp_2 = _fn(*itLRU_t2, it_t2_tmp->second.first);
                     assert(t1a.size() < DRAM_capacity);
                     t1a.insert(make_pair(*itLRU_t2, make_pair(v_tmp_2, itNew)));
-                    ///evcit and flush LRU page of t2
+                    // evcit and flush LRU page of t2
                     t2.erase(it_t2_tmp);
                     t2_key.remove(*itLRU_t2);
                     PRINTV(logfile << "REPLACE evicts and flushes a dirty page " << *itLRU_t2 << "++frequency: " << fList.find(leastFrequencyKey)->second << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
@@ -1136,44 +1166,141 @@ public:
                 if(it_t1b_tmp != t1b.end()) {
                     assert(it_t1a_tmp == t1a.end());
 
-                    ///insert LFU page of t1 to MRU of b1
+                    // insert LFU page of t1 to MRU of b1
                     typename key_tracker_type::iterator itNew = b1_key.insert(b1_key.end(), leastFrequencyKey);
                     const V v_tmp = _fn(leastFrequencyKey, it_t1b_tmp->second.first);
                     b1.insert(make_pair(leastFrequencyKey, make_pair(v_tmp, itNew)));
                     PRINTV(logfile << "Case REPLACE insert LFU page of t1b to b1: " << leastFrequencyKey << "++frequency: " << fList.find(leastFrequencyKey)->second << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
 
-                    ///evcit LFU page of t1b
+                    // evcit LFU page of t1b
                     t1b.erase(it_t1b_tmp);
                     t1_key.remove(leastFrequencyKey);
 
                     PRINTV(logfile << "Case REPLACE evicts LFU page from t1b: " << leastFrequencyKey << "++frequency: " << fList.find(leastFrequencyKey)->second << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
 
-                    ///insert LRU page of t2 to t1b
+                    // insert LRU page of t2 to t1b
                     itNew = t1_key.insert(t1_key.end(), *itLRU_t2);
                     const V v_tmp_2 = _fn(*itLRU_t2, it_t2_tmp->second.first);
                     assert(t1b.size() + t2.size() < (unsigned)NVM_capacity);
                     t1b.insert(make_pair(*itLRU_t2, make_pair(v_tmp_2, itNew)));
-                    ///evcit and flush LRU page of t2
+                    // evcit and flush LRU page of t2
                     t2.erase(it_t2_tmp);
                     t2_key.remove(*itLRU_t2);
                     PRINTV(logfile << "REPLACE evicts and flushes a dirty page " << *itLRU_t2 << "++frequency: " << fList.find(*itLRU_t2)->second << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
                     totalPageWriteToStorage++;
                 }
             }
-            ///frequency of LRU page of t2 is smaller or equal to LFU of t1
+            // frequency of LRU page of t2 is smaller or equal to LFU of t1
             else {
-                ///insert LRU page of t2 to MRU of b2
+                // insert LRU page of t2 to MRU of b2
                 typename key_tracker_type::iterator itNew = b2_key.insert(b2_key.end(), *itLRU_t2);
                 const V v_tmp = _fn(*itLRU_t2, it_t2_tmp->second.first);
                 b2.insert(make_pair(*itLRU_t2, make_pair(v_tmp, itNew)));
                 PRINTV(logfile << "Case REPLACE insert LRU page of t2 to b2: " << leastFrequencyKey << "++frequency: " << fList.find(leastFrequencyKey)->second << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
 
-                ///evcit and flush LRU page of t2
+                // evcit and flush LRU page of t2
                 t2.erase(it_t2_tmp);
                 t2_key.remove(*itLRU_t2);
                 PRINTV(logfile << "REPLACE evicts and flushes a dirty page " << *itLRU_t2 << "++frequency: " << fList.find(*itLRU_t2)->second << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
                 totalPageWriteToStorage++;
             }
+        }
+    }
+
+    // Hibachi subroutine
+    void seqListInsert (const K &k) {
+        PRINTV(logfile << "seqList inserts key " << k <<  endl;);
+        int i = k;
+        int j = k;
+
+        ///left is smaller end and right is larger end
+        int leftMost = k;
+        int rightMost = k;
+
+        int seqLength = 1;
+
+        typename key_to_value_type::iterator itLeft = t2.find(--i);
+        typename key_to_value_type::iterator itRight = t2.find(++j);
+
+        while(itLeft != t2.end()) {
+            PRINTV(logfile << "seqListUpdate find left key " << i <<  endl;);
+            leftMost = i;
+            seqLength++;
+            itLeft = t2.find(--i);
+        }
+        while(itRight != t2.end()) {
+            PRINTV(logfile << "seqListUpdate find right key " << j <<  endl;);
+            rightMost = j;
+            seqLength++;
+            itRight = t2.find(++j);
+        }
+        PRINTV(logfile << "seqLength " << seqLength <<  endl;);
+        if( (unsigned(leftMost) == k) && (unsigned(rightMost) != k) ) {
+            PRINTV(logfile << "seqListUpdate leftMost is equal to k " << leftMost<< "," << rightMost <<  endl;);
+            typename key_to_value_type_seqList::iterator itTmp = seqList.find(k+1);
+            if (itTmp != seqList.end()) {
+                seqList.erase(k+1);
+                PRINTV(logfile << "seqListUpdate seqList has key - k+1 already, need to be erased first, k+1 is " << k+1 <<  endl;);
+            }
+            seqList.insert(make_pair(k, seqLength));
+            PRINTV(logfile << "seqListUpdate seqList insert (key, value): (" << k << "," << seqLength << ")" << endl;);
+        }
+        else if( (unsigned(rightMost) == k) && (unsigned(leftMost) != k) ) {
+            PRINTV(logfile << "seqListUpdate rightMost is equal to k " << leftMost<< "," << rightMost <<  endl;);
+            seqList.erase(leftMost);
+            seqList.insert(make_pair(leftMost, seqLength));
+            PRINTV(logfile << "seqListUpdate seqList insert (key, value): (" << leftMost << "," << seqLength << ")" << endl;);
+        }
+        else if( (unsigned(rightMost) == k) && (unsigned(leftMost) == k) ) {
+            PRINTV(logfile << "seqListUpdate leftMost and rightMost are equal to k " << leftMost<< "," << rightMost <<  endl;);
+            seqList.insert(make_pair(leftMost, seqLength));
+            PRINTV(logfile << "seqListUpdate seqList insert (key, value): (" << leftMost << "," << seqLength << ")" << endl;);
+        }
+        else if( (unsigned(rightMost) != k) && (unsigned(leftMost) != k) ) {
+            PRINTV(logfile << "seqListUpdate leftMost and rightMost are not equal to k " << leftMost<< "," << rightMost <<  endl;);
+            typename key_to_value_type_seqList::iterator itTmp = seqList.find(k+1);
+            if (itTmp != seqList.end()) {
+                seqList.erase(k+1);
+                PRINTV(logfile << "seqListUpdate seqList has key - k+1 already, need to be erased first, k+1 is " << k+1 <<  endl;);
+            }
+            seqList.erase(leftMost);
+            seqList.insert(make_pair(leftMost, seqLength));
+            PRINTV(logfile << "seqListUpdate seqList insert (key, value): (" << leftMost << "," << seqLength << ")" << endl;);
+        }
+    }
+
+    // Hibachi subroutine
+    void seqListEvict(const K &k) {
+        PRINTV(logfile << "seqList evicts key " << k <<  endl;);
+
+        // find out which key value pair that "k" locates in
+        int key;
+        int value;
+        typename key_to_value_type_seqList::iterator itSeqList = seqList.begin();
+        while(itSeqList != seqList.end()) {
+            if( (itSeqList->first <= k) && ((itSeqList->first + itSeqList->second - 1) >= k) ) {
+                key = itSeqList->first;
+                value = itSeqList->second;
+                break;
+            }
+            itSeqList++;
+        }
+
+        if(key == k) {
+            seqList.erase(key);
+            seqList.insert(make_pair(key+1, value-1));
+            PRINTV(logfile << "seqListUpdate seqList insert (key, value): (" << key+1 << "," << value-1 << ")" << endl;);
+        }
+        else if( (key+value-1) == k ) {
+            seqList.erase(key);
+            seqList.insert(make_pair(key, value-1));
+            PRINTV(logfile << "seqListUpdate seqList insert (key, value): (" << key << "," << value-1 << ")" << endl;);
+        }
+        else {
+            seqList.erase(key);
+            seqList.insert(make_pair(key, k-key));
+            seqList.insert(make_pair(k+1, value-(k-key)-1));
+            PRINTV(logfile << "seqListUpdate seqList insert (key, value): (" << key << "," << k-key << ") and (key, value): (" << k+1 << "," << value-(k-key)-1 << ")" << endl;);
         }
     }
 
@@ -1186,27 +1313,30 @@ private:
 
     unsigned levelMinusMinus;
 
-    ///ziqi: Key access history clean page LRU list
+    // Key access history clean page LRU list
     key_tracker_type t1_key;
-    ///ziqi: Key-to-value lookup clean page in DRAM
+    // Key-to-value lookup clean page in DRAM
     key_to_value_type t1a;
-    ///ziqi: Key-to-value lookup clean page in NVRAM
+    // Key-to-value lookup clean page in NVRAM
     key_to_value_type t1b;
-    ///ziqi: Key access history dirty page LRU list
+    // Key access history dirty page LRU list
     key_tracker_type t2_key;
-    ///ziqi: Key-to-value lookup dirty page in NVRAM
+    // Key-to-value lookup dirty page in NVRAM
     key_to_value_type t2;
-    ///ziqi: Key access history clean ghost LRU list
+    // Key access history clean ghost LRU list
     key_tracker_type b1_key;
-    ///ziqi: Key-to-value lookup clean ghost pages
+    // Key-to-value lookup clean ghost pages
     key_to_value_type b1;
-    ///ziqi: Key access history dirty ghost LRU list
+    // Key access history dirty ghost LRU list
     key_tracker_type b2_key;
-    ///ziqi: Key-to-value lookup dirty ghost pages
+    // Key-to-value lookup dirty ghost pages
     key_to_value_type b2;
 
-    ///ziqi: Key-to-value lookup
+    // Key-to-value lookup
     key_to_value_type_frequencyList fList;
+
+    // Key-to-value lookup
+    key_to_value_type_seqList seqList;
 };
 
 #endif //end hybrid
