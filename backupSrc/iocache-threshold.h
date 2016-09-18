@@ -1,7 +1,7 @@
 //
-// C++ Interface: darc
+// C++ Interface: I/O-Cache
 //
-// Description: I/OCache when evict from dirty cache, evict the longest queue in order to take advantage of HDD
+// Description: I/O-Cache when evict from dirty cache, evict the longest queue in order to take advantage of HDD
 //Dirty/clean cache partition algorithm. Hit on clean ghost enlarge desired clean cache; hit on dirty ghost enlarge desired dirty cache.
 //
 // Author: Ziqi Fan, (C) 2014
@@ -43,8 +43,7 @@ public:
     typedef map
     < K, pair<V, typename key_tracker_type::iterator> > 	key_to_value_type;
 
-    typedef map
-    < int, int > 	key_to_value_type_seqList;
+    typedef map<int, int > key_to_value_type_seqList;
 // Constuctor specifies the cached function and
 // the maximum number of records to be stored.
     IOCACHE_THRESHOLD(
@@ -98,7 +97,7 @@ public:
                 // linked to the usage record.
                 t2.insert(make_pair(k, make_pair(v, itNew)));
                 PRINTV(logfile << "Case I insert a dirty page to t2: " << k << "** t1 size: "<< t1.size()<< ", t2 size: "<< t2.size() << "** b1 size: "<< b1.size()<< ", b2 size: "<< b2.size() <<endl;);
-                ///update seqList
+                // update seqList
                 seqListUpdate(k);
             }
             ///ziqi: if it is a read request

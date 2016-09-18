@@ -13,6 +13,7 @@
 #include "hybrid-fixed.h"
 #include "hybrid-dynamic.h"
 #include "hybrid-lrulfu.h"
+#include "hibachi.h"
 
 
 /*
@@ -192,6 +193,9 @@ void	Initialize(int argc, char **argv, deque<reqAtom> & memTrace)
         }
         else if(_gConfiguration.GetAlgName(i).compare("hybrid-lrulfu") == 0) {
             _gTestCache[i] = new HybridLRULFU<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+        }
+        else if(_gConfiguration.GetAlgName(i).compare("hibachi") == 0) {
+            _gTestCache[i] = new Hibachi<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
         }
 
         /*
@@ -481,6 +485,7 @@ int main(int argc, char **argv)
             ||_gConfiguration.GetAlgName(0).compare("hybrid-dynamic-withpcr") == 0
             ||_gConfiguration.GetAlgName(0).compare("hybrid-fixed") == 0
             ||_gConfiguration.GetAlgName(0).compare("hybrid-lrulfu") == 0
+            ||_gConfiguration.GetAlgName(0).compare("hibachi") == 0
             ||_gConfiguration.GetAlgName(0).compare("wnrdnd") == 0
             ||_gConfiguration.GetAlgName(0).compare("wnrdad") == 0
             ||_gConfiguration.GetAlgName(0).compare("wdrdnd") == 0

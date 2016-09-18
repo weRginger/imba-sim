@@ -4,8 +4,8 @@
 // Author: Ziqi Fan, UMN
 //
 
-#ifndef HybridLRULFU_H
-#define HybridLRULFU_H
+#ifndef Hibachi_H
+#define Hibachi_H
 
 #include <map>
 #include <list>
@@ -33,7 +33,7 @@ extern int readHitOnDRAM;
 // LRU-replacement cache of a function with signature
 // V f(K)
 template <typename K, typename V>
-class HybridLRULFU : public TestCache<K, V>
+class Hibachi : public TestCache<K, V>
 {
 public:
     // Key access history, most recent at back
@@ -47,7 +47,7 @@ public:
 
     // Constuctor specifies the cached function and
     // the maximum number of records to be stored.
-    HybridLRULFU(
+    Hibachi(
         V(*f)(const K & , V),
         size_t c,
         unsigned levelMinus
@@ -58,6 +58,7 @@ public:
     uint32_t access(const K &k  , V &value, uint32_t status) {
         size_t DRAM_capacity = (size_t)_capacity;
         int NVM_capacity = nvramSize;
+        PRINTV(logfile<<"NVM_capacity = "<<nvramSize<<endl;);
 
         PRINTV(logfile << endl;);
         // p denotes the length of t1 and (_capacity - p) denotes the lenght of t2
@@ -73,7 +74,7 @@ public:
 
         PRINTV(logfile << "Access key: " << k << endl;);
 
-        if ((t1a.size() + t1b.size() + b1.size()) > ((unsigned)NVM_capacity+DRAM_capacity)) {
+        while ((t1a.size() + t1b.size() + b1.size()) > ((unsigned)NVM_capacity+DRAM_capacity)) {
             // find the least frequency in fList
             // store the least frequency in fList
             int leastFrequency_tmp = 9999999;
@@ -1345,22 +1346,28 @@ public:
         // find out which key value pair that "k" locates in
         int key;
         int value;
+
         typename key_to_value_type_seqList::iterator itSeqList = seqList.begin();
         while(itSeqList != seqList.end()) {
-            if( (itSeqList->first <= k) && ((itSeqList->first + itSeqList->second - 1) >= k) ) {
+            if( ( unsigned(itSeqList->first) <= k) && ( unsigned(itSeqList->first + itSeqList->second - 1) >= k) ) {
                 key = itSeqList->first;
                 value = itSeqList->second;
                 break;
             }
             itSeqList++;
         }
+        PRINTV(logfile << "value " << value <<  endl;);
 
-        if(key == k) {
+        if(value == 1) {
+            // evict the key from seqList since it is the only item in the sequence
+            seqList.erase(key);
+        }
+        else if(unsigned(key) == k) {
             seqList.erase(key);
             seqList.insert(make_pair(key+1, value-1));
             PRINTV(logfile << "seqListUpdate seqList insert (key, value): (" << key+1 << "," << value-1 << ")" << endl;);
         }
-        else if( (key+value-1) == k ) {
+        else if( unsigned(key+value-1) == k ) {
             seqList.erase(key);
             seqList.insert(make_pair(key, value-1));
             PRINTV(logfile << "seqListUpdate seqList insert (key, value): (" << key << "," << value-1 << ")" << endl;);
