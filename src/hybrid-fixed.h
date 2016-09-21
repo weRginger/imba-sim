@@ -144,11 +144,17 @@ public:
                             assert(t1a.size() < DRAM_capacity);
                             t1a.insert(make_pair(*itLRU, make_pair(v_tmp, itNewTmp)));
                             PRINTV(logfile << "Case II insert key to t1a: " << *itLRU << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<endl;);
-                            ///flush back and evcit the LRU page of t2
+
+                            // flush back and evcit the LRU page of t2
                             t2.erase(it);
                             t2_key.remove(*itLRU);
                             PRINTV(logfile << "Case II (NVM is filled with dirty pages) evicting t2 and flushing back to DiskSim input trace " << *itLRU << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<endl;);
+                            // DiskSim format Request_arrival_time Device_number Block_number Request_size Request_flags
+                            // Device_number is set to 1. About Request_flags, 0 is for write and 1 is for read
+                            PRINTV(logfile << "flushing to disksim input file" <<  endl;);
+                            PRINTV(DISKSIMINPUTSTREAM<<setfill(' ')<<left<<fixed<<setw(25)<<v.getReq().issueTime<<left<<setw(8)<<"0"<<left<<fixed<<setw(12)<<*itLRU<<left<<fixed<<setw(8)<<"1"<<"0"<<endl;);
                             totalPageWriteToStorage++;
+
                             ///migrate the hitted page to MRU of t2
                             assert(t2.size()+t1b.size() < (unsigned)NVM_capacity);
                             // Record k as most-recently-used key
@@ -280,6 +286,10 @@ public:
                         // Erase both elements to completely purge record
                         t2.erase(itLRUValue);
                         t2_key.remove(*itLRU);
+                        // DiskSim format Request_arrival_time Device_number Block_number Request_size Request_flags
+                        // Device_number is set to 1. About Request_flags, 0 is for write and 1 is for read
+                        PRINTV(logfile << "flushing to disksim input file" <<  endl;);
+                        PRINTV(DISKSIMINPUTSTREAM<<setfill(' ')<<left<<fixed<<setw(25)<<v.getReq().issueTime<<left<<setw(8)<<"0"<<left<<fixed<<setw(12)<<*itLRU<<left<<fixed<<setw(8)<<"1"<<"0"<<endl;);
                         totalPageWriteToStorage++;
 
                         PRINTV(logfile << "Case III (NVM is filled with dirty pages) evicting t2 " << *itLRU << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<endl;);

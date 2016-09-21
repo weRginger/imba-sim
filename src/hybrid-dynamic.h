@@ -156,6 +156,10 @@ public:
                             t2.erase(it);
                             t2_key.remove(*itLRU);
                             PRINTV(logfile << "Case II (NVM is filled with dirty pages) evicting t2 and flushing back " << *itLRU << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
+                            // DiskSim format Request_arrival_time Device_number Block_number Request_size Request_flags
+                            // Device_number is set to 1. About Request_flags, 0 is for write and 1 is for read
+                            PRINTV(logfile << "flushing to disksim input file" <<  endl;);
+                            PRINTV(DISKSIMINPUTSTREAM<<setfill(' ')<<left<<fixed<<setw(25)<<v.getReq().issueTime<<left<<setw(8)<<"0"<<left<<fixed<<setw(12)<<*itLRU<<left<<fixed<<setw(8)<<"1"<<"0"<<endl;);
                             totalPageWriteToStorage++;
 
                             ///migrate the hitted page to MRU of t2
@@ -561,6 +565,10 @@ public:
                         // Erase both elements to completely purge record
                         t2.erase(itLRUValue);
                         t2_key.remove(*itLRU);
+                        // DiskSim format Request_arrival_time Device_number Block_number Request_size Request_flags
+                        // Device_number is set to 1. About Request_flags, 0 is for write and 1 is for read
+                        PRINTV(logfile << "flushing to disksim input file" <<  endl;);
+                        PRINTV(DISKSIMINPUTSTREAM<<setfill(' ')<<left<<fixed<<setw(25)<<v.getReq().issueTime<<left<<setw(8)<<"0"<<left<<fixed<<setw(12)<<*itLRU<<left<<fixed<<setw(8)<<"1"<<"0"<<endl;);
                         totalPageWriteToStorage++;
 
                         PRINTV(logfile << "Case V (NVM is filled with dirty pages) evicting t2 and flushing back " << *itLRU << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
@@ -676,9 +684,14 @@ public:
 
                 // Erase both elements to completely purge record
                 PRINTV(logfile << "REPLACE evicting dirty key " << *itLRU <<  endl;);
-                totalPageWriteToStorage++;
+
                 t2.erase(itLRUValue);
                 t2_key.remove(*itLRU);
+                // DiskSim format Request_arrival_time Device_number Block_number Request_size Request_flags
+                // Device_number is set to 1. About Request_flags, 0 is for write and 1 is for read
+                PRINTV(logfile << "flushing to disksim input file" <<  endl;);
+                PRINTV(DISKSIMINPUTSTREAM<<setfill(' ')<<left<<fixed<<setw(25)<<v.getReq().issueTime<<left<<setw(8)<<"0"<<left<<fixed<<setw(12)<<*itLRU<<left<<fixed<<setw(8)<<"1"<<"0"<<endl;);
+                totalPageWriteToStorage++;
 
                 PRINTV(logfile << "REPLACE (NVM not filled with dirty pages) evicting t2 " << *itLRU << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
             }
@@ -718,9 +731,14 @@ public:
 
                 // Erase both elements to completely purge record
                 PRINTV(logfile << "REPLACE evicting dirty key " << *itLRU <<  endl;);
-                totalPageWriteToStorage++;
+
                 t2.erase(itLRUValue);
                 t2_key.remove(*itLRU);
+                // DiskSim format Request_arrival_time Device_number Block_number Request_size Request_flags
+                // Device_number is set to 1. About Request_flags, 0 is for write and 1 is for read
+                PRINTV(logfile << "flushing to disksim input file" <<  endl;);
+                PRINTV(DISKSIMINPUTSTREAM<<setfill(' ')<<left<<fixed<<setw(25)<<v.getReq().issueTime<<left<<setw(8)<<"0"<<left<<fixed<<setw(12)<<*itLRU<<left<<fixed<<setw(8)<<"1"<<"0"<<endl;);
+                totalPageWriteToStorage++;
 
                 PRINTV(logfile << "REPLACE (NVM is filled with dirty pages) evicting t2 and flushing back " << *itLRU << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
             }

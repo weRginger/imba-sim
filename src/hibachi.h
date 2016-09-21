@@ -208,6 +208,11 @@ public:
                             t2.erase(it);
                             t2_key.remove(*itLRU);
 
+                            // DiskSim format Request_arrival_time Device_number Block_number Request_size Request_flags
+                            // Device_number is set to 1. About Request_flags, 0 is for write and 1 is for read
+                            PRINTV(logfile << "flushing to disksim input file" <<  endl;);
+                            PRINTV(DISKSIMINPUTSTREAM<<setfill(' ')<<left<<fixed<<setw(25)<<value.getReq().issueTime<<left<<setw(8)<<"0"<<left<<fixed<<setw(12)<<*itLRU<<left<<fixed<<setw(8)<<"1"<<"0"<<endl;);
+
                             seqListEvict(*itLRU);
 
                             PRINTV(logfile << "Case II (NVRAM is filled with dirty pages) evicting t2 and flushing back " << *itLRU << "++frequency: " << fList.find(*itLRU)->second << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
@@ -887,6 +892,11 @@ public:
                         t2.erase(it);
                         t2_key.remove(*itLRU);
 
+                        // DiskSim format Request_arrival_time Device_number Block_number Request_size Request_flags
+                        // Device_number is set to 1. About Request_flags, 0 is for write and 1 is for read
+                        PRINTV(logfile << "flushing to disksim input file" <<  endl;);
+                        PRINTV(DISKSIMINPUTSTREAM<<setfill(' ')<<left<<fixed<<setw(25)<<v.getReq().issueTime<<left<<setw(8)<<"0"<<left<<fixed<<setw(12)<<*itLRU<<left<<fixed<<setw(8)<<"1"<<"0"<<endl;);
+
                         seqListEvict(*itLRU);
 
                         PRINTV(logfile << "Case V (NVM is filled with dirty pages) evicts and flushes a dirty page " << *itLRU << "++frequency: " << fList.find(*itLRU)->second << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
@@ -1075,6 +1085,11 @@ public:
                 t2.erase(it);
                 t2_key.remove(*itLRU);
 
+                // DiskSim format Request_arrival_time Device_number Block_number Request_size Request_flags
+                // Device_number is set to 1. About Request_flags, 0 is for write and 1 is for read
+                PRINTV(logfile << "flushing to disksim input file" <<  endl;);
+                PRINTV(DISKSIMINPUTSTREAM<<setfill(' ')<<left<<fixed<<setw(25)<<v.getReq().issueTime<<left<<setw(8)<<"0"<<left<<fixed<<setw(12)<<*itLRU<<left<<fixed<<setw(8)<<"1"<<"0"<<endl;);
+
                 seqListEvict(*itLRU);
 
                 PRINTV(logfile << "Case REPLACE (NVM is filled with dirty pages) evicts and flushes a dirty page " << *itLRU << "++frequency: " << fList.find(*itLRU)->second << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
@@ -1220,6 +1235,11 @@ public:
                         t2.erase(it_t2_tmp);
                         t2_key.remove(*itLRU_t2);
 
+                        // DiskSim format Request_arrival_time Device_number Block_number Request_size Request_flags
+                        // Device_number is set to 1. About Request_flags, 0 is for write and 1 is for read
+                        PRINTV(logfile << "flushing to disksim input file" <<  endl;);
+                        PRINTV(DISKSIMINPUTSTREAM<<setfill(' ')<<left<<fixed<<setw(25)<<v.getReq().issueTime<<left<<setw(8)<<"0"<<left<<fixed<<setw(12)<<*itLRU_t2<<left<<fixed<<setw(8)<<"1"<<"0"<<endl;);
+
                         seqListEvict(*itLRU_t2);
 
                         PRINTV(logfile << "REPLACE evicts and flushes a dirty page " << *itLRU_t2 << "++frequency: " << fList.find(leastFrequencyKey)->second << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
@@ -1250,6 +1270,11 @@ public:
                         t2.erase(it_t2_tmp);
                         t2_key.remove(*itLRU_t2);
 
+                        // DiskSim format Request_arrival_time Device_number Block_number Request_size Request_flags
+                        // Device_number is set to 1. About Request_flags, 0 is for write and 1 is for read
+                        PRINTV(logfile << "flushing to disksim input file" <<  endl;);
+                        PRINTV(DISKSIMINPUTSTREAM<<setfill(' ')<<left<<fixed<<setw(25)<<v.getReq().issueTime<<left<<setw(8)<<"0"<<left<<fixed<<setw(12)<<*itLRU_t2<<left<<fixed<<setw(8)<<"1"<<"0"<<endl;);
+
                         seqListEvict(*itLRU_t2);
 
                         PRINTV(logfile << "REPLACE evicts and flushes a dirty page " << *itLRU_t2 << "++frequency: " << fList.find(*itLRU_t2)->second << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
@@ -1267,6 +1292,11 @@ public:
                     // evcit and flush LRU page of t2
                     t2.erase(it_t2_tmp);
                     t2_key.remove(*itLRU_t2);
+
+                    // DiskSim format Request_arrival_time Device_number Block_number Request_size Request_flags
+                    // Device_number is set to 1. About Request_flags, 0 is for write and 1 is for read
+                    PRINTV(logfile << "flushing to disksim input file" <<  endl;);
+                    PRINTV(DISKSIMINPUTSTREAM<<setfill(' ')<<left<<fixed<<setw(25)<<v.getReq().issueTime<<left<<setw(8)<<"0"<<left<<fixed<<setw(12)<<*itLRU_t2<<left<<fixed<<setw(8)<<"1"<<"0"<<endl;);
 
                     seqListEvict(*itLRU_t2);
 
