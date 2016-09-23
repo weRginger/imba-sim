@@ -1,7 +1,8 @@
-wnrdnd-p1-m0.5-c1k-fio_zipf.stat
-wnrdnd-p1-m0.5-c2k-fio_zipf.stat
-wnrdnd-p1-m0.5-c4k-fio_zipf.stat
-wnrdnd-p1-m0.5-c8k-fio_zipf.stat
-wnrdnd-p1-m0.5-c16k-fio_zipf.stat
-wnrdnd-p1-m0.5-c32k-fio_zipf.stat
-wnrdnd-p1-m0.5-c64k-fio_zipf.stat
+lrudram-c64k-rsrch_0.stat
+wnrdad-d64k-n1k-rsrch_0.stat
+wnrdad-d64k-n2k-rsrch_0.stat
+wnrdad-d64k-n4k-rsrch_0.stat
+wnrdad-d64k-n8k-rsrch_0.stat
+wnrdad-d64k-n16k-rsrch_0.stat
+wnrdad-d64k-n32k-rsrch_0.stat
+wnrdad-d64k-n64k-rsrch_0.stat

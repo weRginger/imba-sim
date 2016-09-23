@@ -1,0 +1,6 @@
+./analysis files.txt "Total page write number to storage,"
+./analysis files.txt "Page read cache hit ratio,"
+./analysis files.txt "Page write cache hit ratio,"
+./analysis files.txt "Total cache hit ratio,"
+./analysis files.txt "Page read hit on NVRAM,"
+./analysis files.txt "Page read hit on DRAM,"
