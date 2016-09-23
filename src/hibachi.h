@@ -192,31 +192,97 @@ public:
                         if(t2.size() == (unsigned)NVM_capacity) {
                             PRINTV(logfile << "Case II Write hit on t1a, and NVRAM is full, t2.size() == NVRAM: "<< endl;);
 
-                            ///select the LRU page of t2
-                            typename key_tracker_type::iterator itLRU = t2_key.begin();
-                            assert(itLRU != t2_key.end());
-                            typename key_to_value_type::iterator it = t2.find(*itLRU);
-                            assert(it != t2.end());
-                            ///insert LRU page of t2 to LRU of t1a
-                            typename key_tracker_type::iterator itNewTmp = t1_key.insert(t1_key.begin(), *itLRU);
-                            // Create the key-value entry,
-                            // linked to the usage record.
-                            const V v_tmp = _fn(*itLRU, it->second.first);
-                            assert(t1a.size() < DRAM_capacity);
-                            t1a.insert(make_pair(*itLRU, make_pair(v_tmp, itNewTmp)));
-                            ///evict and flush LRU page of t2
-                            t2.erase(it);
-                            t2_key.remove(*itLRU);
+                            // find the max length in seqList
+                            // store the maximum length in seqList
+                            int maxLength = 0;
+                            // store the key of maximum length in seqList
+                            int maxLengthKey = 0;
+                            typename key_to_value_type_seqList::iterator itSeqList = seqList.begin();
+                            while(itSeqList != seqList.end()) {
+                                if(itSeqList->second > maxLength) {
+                                    maxLength = itSeqList->second;
+                                    maxLengthKey = itSeqList->first;
+                                }
+                                itSeqList++;
+                            }
+                            PRINTV(logfile << "maxLengthKey " << maxLengthKey << " ,maxLength " << maxLength <<  endl;);
 
-                            // DiskSim format Request_arrival_time Device_number Block_number Request_size Request_flags
-                            // Device_number is set to 1. About Request_flags, 0 is for write and 1 is for read
-                            PRINTV(logfile << "flushing to disksim input file" <<  endl;);
-                            PRINTV(DISKSIMINPUTSTREAM<<setfill(' ')<<left<<fixed<<setw(25)<<value.getReq().issueTime<<left<<setw(8)<<"0"<<left<<fixed<<setw(12)<<*itLRU<<left<<fixed<<setw(8)<<"1"<<"0"<<endl;);
+                            // maxLength in the seqList above the threshold, flush the sequence
+                            if(maxLength > threshold) {
+                                PRINTV(logfile << "maxLength is above threshold: " << threshold << endl;);
+                                // flush to HDD
+                                // DiskSim format Request_arrival_time Device_number Block_number Request_size Request_flags
+                                // Device_number is set to 1. About Request_flags, 0 is for write and 1 is for read
+                                PRINTV(logfile << "flushing to disksim input file" <<  endl;);
+                                PRINTV(DISKSIMINPUTSTREAM<<setfill(' ')<<left<<fixed<<setw(25)<<value.getReq().issueTime<<left<<setw(8)<<"0"<<left<<fixed<<setw(12)<<maxLengthKey<<left<<fixed<<setw(8)<<maxLength<<"0"<<endl;);
 
-                            seqListEvict(*itLRU);
+                                //keep score of total page write number to storage
+                                totalPageWriteToStorage = totalPageWriteToStorage + maxLength;
 
-                            PRINTV(logfile << "Case II (NVRAM is filled with dirty pages) evicting t2 and flushing back " << *itLRU << "++frequency: " << fList.find(*itLRU)->second << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
-                            totalPageWriteToStorage++;
+                                // move maxLengthKey page from t2 to LRU of t1a
+                                typename key_to_value_type::iterator itFirst = t2.find(maxLengthKey);
+                                assert(itFirst != t2.end());
+                                typename key_tracker_type::iterator itNew = t1_key.insert(t1_key.begin(), maxLengthKey);
+                                const V v_tmp = _fn(maxLengthKey, itFirst->second.first);
+                                t1a.insert(make_pair(maxLengthKey, make_pair(v_tmp, itNew)));
+                                PRINTV(logfile << "Case II move key from t2 to LRU of t1a: " << maxLengthKey << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
+
+                                // insert from maxLengthKey+1 to maxLengthKey+maxLength to t1b
+                                int i=1;
+                                while(i<maxLength) {
+                                    typename key_to_value_type::iterator it = t2.find(maxLengthKey+i);
+                                    assert(it != t2.end());
+                                    ///insert to LRU position instead of MRU position
+                                    typename key_tracker_type::iterator itNew = t1_key.insert(t1_key.begin(), maxLengthKey+i);
+                                    V v_tmp = _fn(maxLengthKey+i, it->second.first);
+                                    t1b.insert(make_pair(maxLengthKey+i, make_pair(v_tmp, itNew)));
+                                    PRINTV(logfile << "Case II insert to LRU of t1: " << maxLengthKey+i << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
+                                    i++;
+                                }
+
+                                // evict from maxLengthKey to maxLengthKey+maxLength from t2
+                                i=0;
+                                while(i<maxLength) {
+                                    typename key_to_value_type::iterator it = t2.find(maxLengthKey+i);
+                                    assert(it != t2.end());
+                                    t2.erase(it);
+                                    t2_key.remove(maxLengthKey+i);
+                                    PRINTV(logfile << "Case II erase seq page: " << maxLengthKey+i << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
+                                    i++;
+                                }
+                                // erase maxLengthKey from seqList
+                                seqList.erase(maxLengthKey);
+                                PRINTV(logfile << "Case II erase maxLengthKey key from seqList: " << maxLengthKey << endl;);
+                            }
+
+                            // maxLength is smaller than threshold, follow LRU order
+                            else {
+                                // select the LRU page of t2
+                                typename key_tracker_type::iterator itLRU = t2_key.begin();
+                                assert(itLRU != t2_key.end());
+                                typename key_to_value_type::iterator it = t2.find(*itLRU);
+                                assert(it != t2.end());
+                                ///insert LRU page of t2 to LRU of t1a
+                                typename key_tracker_type::iterator itNewTmp = t1_key.insert(t1_key.begin(), *itLRU);
+                                // Create the key-value entry,
+                                // linked to the usage record.
+                                const V v_tmp = _fn(*itLRU, it->second.first);
+                                assert(t1a.size() < DRAM_capacity);
+                                t1a.insert(make_pair(*itLRU, make_pair(v_tmp, itNewTmp)));
+                                // evict and flush LRU page of t2
+                                t2.erase(it);
+                                t2_key.remove(*itLRU);
+
+                                // DiskSim format Request_arrival_time Device_number Block_number Request_size Request_flags
+                                // Device_number is set to 1. About Request_flags, 0 is for write and 1 is for read
+                                PRINTV(logfile << "flushing to disksim input file" <<  endl;);
+                                PRINTV(DISKSIMINPUTSTREAM<<setfill(' ')<<left<<fixed<<setw(25)<<value.getReq().issueTime<<left<<setw(8)<<"0"<<left<<fixed<<setw(12)<<*itLRU<<left<<fixed<<setw(8)<<"1"<<"0"<<endl;);
+
+                                seqListEvict(*itLRU);
+
+                                PRINTV(logfile << "Case II (NVRAM is filled with dirty pages) evicting t2 and flushing back " << *itLRU << "++frequency: " << fList.find(*itLRU)->second << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
+                                totalPageWriteToStorage++;
+                            }
                         }
                         ///NVRAM is full but is not filled with dirty pages
                         else {
@@ -876,31 +942,98 @@ public:
                     // NVRAM is filled with dirty pages
                     if(t2.size() == (unsigned)NVM_capacity) {
                         PRINTV(logfile << "Case V, write miss and NVRAM is full, t2.size() == NVRAM: " << k << endl;);
-                        ///select the LRU page of t2
-                        typename key_tracker_type::iterator itLRU = t2_key.begin();
-                        assert(itLRU != t2_key.end());
-                        typename key_to_value_type::iterator it = t2.find(*itLRU);
-                        assert(it != t2.end());
-                        ///insert LRU page of t2 to LRU of t1a
-                        typename key_tracker_type::iterator itNewTmp = t1_key.insert(t1_key.begin(), *itLRU);
-                        // Create the key-value entry,
-                        // linked to the usage record.
-                        const V v_tmp = _fn(*itLRU, it->second.first);
-                        assert(t1a.size() < DRAM_capacity);
-                        t1a.insert(make_pair(*itLRU, make_pair(v_tmp, itNewTmp)));
-                        ///flush back and evcit the LRU page of t2
-                        t2.erase(it);
-                        t2_key.remove(*itLRU);
 
-                        // DiskSim format Request_arrival_time Device_number Block_number Request_size Request_flags
-                        // Device_number is set to 1. About Request_flags, 0 is for write and 1 is for read
-                        PRINTV(logfile << "flushing to disksim input file" <<  endl;);
-                        PRINTV(DISKSIMINPUTSTREAM<<setfill(' ')<<left<<fixed<<setw(25)<<v.getReq().issueTime<<left<<setw(8)<<"0"<<left<<fixed<<setw(12)<<*itLRU<<left<<fixed<<setw(8)<<"1"<<"0"<<endl;);
+                        // find the max length in seqList
+                        // store the maximum length in seqList
+                        int maxLength = 0;
+                        // store the key of maximum length in seqList
+                        int maxLengthKey = 0;
+                        typename key_to_value_type_seqList::iterator itSeqList = seqList.begin();
+                        while(itSeqList != seqList.end()) {
+                            if(itSeqList->second > maxLength) {
+                                maxLength = itSeqList->second;
+                                maxLengthKey = itSeqList->first;
+                            }
+                            itSeqList++;
+                        }
+                        PRINTV(logfile << "maxLengthKey " << maxLengthKey << " ,maxLength " << maxLength <<  endl;);
 
-                        seqListEvict(*itLRU);
+                        // maxLength in the seqList above the threshold, flush the sequence
+                        if(maxLength > threshold) {
+                            PRINTV(logfile << "maxLength is above threshold: " << threshold << endl;);
+                            // flush to HDD
+                            // DiskSim format Request_arrival_time Device_number Block_number Request_size Request_flags
+                            // Device_number is set to 1. About Request_flags, 0 is for write and 1 is for read
+                            PRINTV(logfile << "flushing to disksim input file" <<  endl;);
+                            PRINTV(DISKSIMINPUTSTREAM<<setfill(' ')<<left<<fixed<<setw(25)<<v.getReq().issueTime<<left<<setw(8)<<"0"<<left<<fixed<<setw(12)<<maxLengthKey<<left<<fixed<<setw(8)<<maxLength<<"0"<<endl;);
 
-                        PRINTV(logfile << "Case V (NVM is filled with dirty pages) evicts and flushes a dirty page " << *itLRU << "++frequency: " << fList.find(*itLRU)->second << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
-                        totalPageWriteToStorage++;
+                            //keep score of total page write number to storage
+                            totalPageWriteToStorage = totalPageWriteToStorage + maxLength;
+
+                            // move maxLengthKey page from t2 to LRU of t1a
+                            typename key_to_value_type::iterator itFirst = t2.find(maxLengthKey);
+                            assert(itFirst != t2.end());
+                            typename key_tracker_type::iterator itNew = t1_key.insert(t1_key.begin(), maxLengthKey);
+                            const V v_tmp = _fn(maxLengthKey, itFirst->second.first);
+                            t1a.insert(make_pair(maxLengthKey, make_pair(v_tmp, itNew)));
+                            PRINTV(logfile << "Case V move key from t2 to LRU of t1a: " << maxLengthKey << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
+
+                            // insert from maxLengthKey+1 to maxLengthKey+maxLength to t1b
+                            int i=1;
+                            while(i<maxLength) {
+                                typename key_to_value_type::iterator it = t2.find(maxLengthKey+i);
+                                assert(it != t2.end());
+                                ///insert to LRU position instead of MRU position
+                                typename key_tracker_type::iterator itNew = t1_key.insert(t1_key.begin(), maxLengthKey+i);
+                                V v_tmp = _fn(maxLengthKey+i, it->second.first);
+                                t1b.insert(make_pair(maxLengthKey+i, make_pair(v_tmp, itNew)));
+                                PRINTV(logfile << "Case V insert to LRU of t1: " << maxLengthKey+i << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
+                                i++;
+                            }
+
+                            // evict from maxLengthKey to maxLengthKey+maxLength from t2
+                            i=0;
+                            while(i<maxLength) {
+                                typename key_to_value_type::iterator it = t2.find(maxLengthKey+i);
+                                assert(it != t2.end());
+                                t2.erase(it);
+                                t2_key.remove(maxLengthKey+i);
+                                PRINTV(logfile << "Case V erase seq page: " << maxLengthKey+i << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
+                                i++;
+                            }
+                            // erase maxLengthKey from seqList
+                            seqList.erase(maxLengthKey);
+                            PRINTV(logfile << "Case V erase maxLengthKey key from seqList: " << maxLengthKey << endl;);
+                        }
+
+                        // maxLength is smaller than threshold, follow LRU order
+                        else {
+                            // select the LRU page of t2
+                            typename key_tracker_type::iterator itLRU = t2_key.begin();
+                            assert(itLRU != t2_key.end());
+                            typename key_to_value_type::iterator it = t2.find(*itLRU);
+                            assert(it != t2.end());
+                            ///insert LRU page of t2 to LRU of t1a
+                            typename key_tracker_type::iterator itNewTmp = t1_key.insert(t1_key.begin(), *itLRU);
+                            // Create the key-value entry,
+                            // linked to the usage record.
+                            const V v_tmp = _fn(*itLRU, it->second.first);
+                            assert(t1a.size() < DRAM_capacity);
+                            t1a.insert(make_pair(*itLRU, make_pair(v_tmp, itNewTmp)));
+                            // evict and flush LRU page of t2
+                            t2.erase(it);
+                            t2_key.remove(*itLRU);
+
+                            // DiskSim format Request_arrival_time Device_number Block_number Request_size Request_flags
+                            // Device_number is set to 1. About Request_flags, 0 is for write and 1 is for read
+                            PRINTV(logfile << "flushing to disksim input file" <<  endl;);
+                            PRINTV(DISKSIMINPUTSTREAM<<setfill(' ')<<left<<fixed<<setw(25)<<value.getReq().issueTime<<left<<setw(8)<<"0"<<left<<fixed<<setw(12)<<*itLRU<<left<<fixed<<setw(8)<<"1"<<"0"<<endl;);
+
+                            seqListEvict(*itLRU);
+
+                            PRINTV(logfile << "Case V (NVRAM is filled with dirty pages) evicting t2 and flushing back " << *itLRU << "++frequency: " << fList.find(*itLRU)->second << "** t1a size: "<< t1a.size()<< ", t1b size: "<< t1b.size()<< ", t2 size: "<< t2.size() <<", b1 size: "<< b1.size() <<", b2 size: "<< b2.size() <<endl;);
+                            totalPageWriteToStorage++;
+                        }
 
                         ///insert the missed page to MRU of t2
                         // Record k as most-recently-used key
@@ -1115,8 +1248,6 @@ public:
             }
             PRINTV(logfile << "maxLengthKey " << maxLengthKey << " ,maxLength " << maxLength <<  endl;);
 
-            // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
             // maxLength in the seqList above the threshold, flush the sequence
             if(maxLength > threshold) {
                 PRINTV(logfile << "maxLength is above threshold: " << threshold << endl;);
@@ -1164,8 +1295,6 @@ public:
                 seqList.erase(maxLengthKey);
                 PRINTV(logfile << "REPLACE erase maxLengthKey key from seqList: " << maxLengthKey << endl;);
             }
-
-            // ------------------------------------------------------------------------
 
             // maxLength is smaller than threshold, follow LRU order
             else {
