@@ -14,6 +14,7 @@
 #include "hybrid-dynamic.h"
 #include "hybrid-lrulfu.h"
 #include "hibachi.h"
+#include "iocache-threshold.h"
 
 
 /*
@@ -49,7 +50,6 @@
 #include "darc.h"
 #include "darc2.h"
 #include "iocache.h"
-#include "iocache-threshold.h"
 #include "darcest.h"
 #include "cflru.h"
 */
@@ -197,6 +197,9 @@ void	Initialize(int argc, char **argv, deque<reqAtom> & memTrace)
         else if(_gConfiguration.GetAlgName(i).compare("hibachi") == 0) {
             _gTestCache[i] = new Hibachi<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
         }
+        else if(_gConfiguration.GetAlgName(i).compare("iocache-threshold") == 0) {
+            _gTestCache[i] = new IOCACHE_THRESHOLD<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+        }
 
         /*
             else if(_gConfiguration.GetAlgName(i).compare("wnrdnd") == 0) {
@@ -258,9 +261,6 @@ void	Initialize(int argc, char **argv, deque<reqAtom> & memTrace)
             }
             else if(_gConfiguration.GetAlgName(i).compare("iocache") == 0) {
                 _gTestCache[i] = new IOCACHE<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-            }
-            else if(_gConfiguration.GetAlgName(i).compare("iocache-threshold") == 0) {
-                _gTestCache[i] = new IOCACHE_THRESHOLD<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
             }
             else if(_gConfiguration.GetAlgName(i).compare("darcest") == 0) {
                 _gTestCache[i] = new DARCEST<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
