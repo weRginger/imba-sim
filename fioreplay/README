@@ -1,0 +1,9 @@
+= Use fio tool to replay a trace on a real disk drive =
+
+1. disksimtrace2fiotrace.sh is a shell script to create a fio compatible from a disksim compatible trace generated from sim-ideal.
+   $ ./disksimtrace2fiotrace.sh /dev/<device name> inputfile outputfile
+
+2. Makefile contains the commands to use fio to run a trace. Change it before use.
+   $ make
+
+3. mix.fio defines the parameters of fio tool.
