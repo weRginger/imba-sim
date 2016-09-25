@@ -212,15 +212,15 @@ void printStats()
 
         statStream << "Page read cache hit ratio, " << double(_gStats[i].PageReadHit.getCounter()) / double(_gStats[i].Ref.getCounter()) * 100 <<"%"<<endl;
 
+        statStream << "Page read hit on NVRAM, " << double(readHitOnNVRAM) / double(_gStats[i].Ref.getCounter()) * 100 <<"%"<<endl;
+
+        statStream << "Page read hit on DRAM, " << double(readHitOnDRAM) / double(_gStats[i].Ref.getCounter()) * 100 <<"%"<<endl;
+
         statStream << "Page write cache hit ratio, " << double(_gStats[i].PageWriteHit.getCounter()) / double(_gStats[i].Ref.getCounter()) * 100 <<"%"<<endl;
 
         //statStream << "Page write hit on dirty pages, " << double(writeHitOnDirty) / double(_gStats[i].Ref.getCounter()) * 100 <<"%"<<endl;
 
         //statStream << "Page write hit on clean pages, " << double(writeHitOnClean) / double(_gStats[i].Ref.getCounter()) * 100 <<"%"<<endl;
-
-        //statStream << "Page read hit on NVRAM, " << double(readHitOnNVRAM) / double(_gStats[i].Ref.getCounter()) * 100 <<"%"<<endl;
-
-        //statStream << "Page read hit on DRAM, " << double(readHitOnDRAM) / double(_gStats[i].Ref.getCounter()) * 100 <<"%"<<endl;
 
         statStream << "Total cache hit ratio, " << (double(_gStats[i].PageReadHit.getCounter()) + double(_gStats[i].PageWriteHit.getCounter())) / double(_gStats[i].Ref.getCounter()) * 100 <<"%"<<endl;
 

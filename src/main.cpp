@@ -14,8 +14,6 @@
 #include "hybrid-dynamic.h"
 #include "hybrid-lrulfu.h"
 #include "hibachi.h"
-#include "iocache-threshold.h"
-
 
 /*
 #include "wn-rd-nd.h"
@@ -31,6 +29,7 @@
 #include "bplru.h"
 #include "lb-clock.h"
 #include "fab.h"
+#include "iocache-threshold.h"
 
 #include "lb-arc.h"
 #include "clock.h"
@@ -197,11 +196,11 @@ void	Initialize(int argc, char **argv, deque<reqAtom> & memTrace)
         else if(_gConfiguration.GetAlgName(i).compare("hibachi") == 0) {
             _gTestCache[i] = new Hibachi<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
         }
-        else if(_gConfiguration.GetAlgName(i).compare("iocache-threshold") == 0) {
-            _gTestCache[i] = new IOCACHE_THRESHOLD<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
-        }
 
         /*
+        else if(_gConfiguration.GetAlgName(i).compare("iocache-threshold") == 0) {
+        _gTestCache[i] = new IOCACHE_THRESHOLD<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+        }
             else if(_gConfiguration.GetAlgName(i).compare("wnrdnd") == 0) {
                 _gTestCache[i] = new WNRDND<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
             }
