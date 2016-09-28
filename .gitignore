@@ -1,0 +1,6 @@
+*.o
+*.stat
+*.cfg
+*.trace
+*.outv
+*.bw
