@@ -99,7 +99,7 @@ public:
 
             t2.erase(it_t2);
             t2_key.remove(k);
-            assert(t2.size() < DRAM_capacity);
+            assert(t2.size() < (unsigned)NVM_capacity);
             const V v = _fn(k, value);
             // Record k as most-recently-used key
             typename key_tracker_type::iterator itNew = t2_key.insert(t2_key.end(), k);
