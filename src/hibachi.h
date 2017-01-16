@@ -29,6 +29,8 @@ extern int readHitOnNVRAM;
 
 extern int readHitOnDRAM;
 
+#define FREQUENCYTHRESHOLD 5.5
+
 // Class providing fixed-size (by number of records)
 // LRU-replacement cache of a function with signature
 // V f(K)
@@ -74,6 +76,10 @@ public:
 
         PRINTV(logfile << "Access key: " << k << endl;);
 
+        // determine whether the average frequency above the threshold
+        // if so, half every frequency and get the ceiling
+        ageFrequency();
+
         while ((t1a.size() + t1b.size() + b1.size()) > ((unsigned)NVM_capacity+DRAM_capacity)) {
             // find the least frequency in fList
             // store the least frequency in fList
@@ -105,7 +111,7 @@ public:
 
             PRINTV(logfile << "leastFrequencyKey_tmp: " << leastFrequencyKey_tmp << ", leastFrequency_tmp: " << leastFrequency_tmp << endl;);
 
-            typename key_to_value_type::iterator it_b1_tmp	= b1.find(leastFrequencyKey_tmp);
+            typename key_to_value_type::iterator it_b1_tmp = b1.find(leastFrequencyKey_tmp);
             assert(it_b1_tmp != b1.end());
             b1.erase(it_b1_tmp);
             b1_key.remove(leastFrequencyKey_tmp);
@@ -1536,6 +1542,29 @@ public:
             seqList.insert(make_pair(key, k-key));
             seqList.insert(make_pair(k+1, value-(k-key)-1));
             PRINTV(logfile << "seqListUpdate seqList insert (key, value): (" << key << "," << k-key << ") and (key, value): (" << k+1 << "," << value-(k-key)-1 << ")" << endl;);
+        }
+    }
+
+    // Hibachi subroutine
+    void ageFrequency() {
+        typename key_to_value_type_frequencyList::iterator itfList = fList.begin();
+        double frequencySum = 0;
+        while(itfList != fList.end()) {
+            frequencySum += itfList->second;
+            itfList++;
+        }
+        double averageFrequency = frequencySum / fList.size();
+        PRINTV(logfile << "averageFrequency: " << averageFrequency << endl;);
+
+        if(averageFrequency > FREQUENCYTHRESHOLD) {
+            itfList = fList.begin();
+            while(itfList != fList.end()) {
+                // half the frequency and get the ceiling
+                PRINTV(logfile << "itfList->second from " << itfList->second;);
+                itfList->second = itfList->second / 2 + (itfList->second % 2 > 0);
+                PRINTV(logfile << " to " << itfList->second << endl;);
+                itfList++;
+            }
         }
     }
 
