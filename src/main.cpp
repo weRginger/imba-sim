@@ -10,8 +10,8 @@
 
 #include "lru.h"
 
-#include "hybrid-fixed.h"
-#include "hybrid-dynamic.h"
+#include "hybrid-arc.h"
+#include "hybrid-lru.h"
 #include "hybrid-lrulfu.h"
 #include "hibachi.h"
 
@@ -184,11 +184,11 @@ void	Initialize(int argc, char **argv, deque<reqAtom> & memTrace)
         if(_gConfiguration.GetAlgName(i).compare("lru") == 0) {
             _gTestCache[i] = new LRU<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
         }
-        else if(_gConfiguration.GetAlgName(i).compare("hybrid-fixed") == 0) {
-            _gTestCache[i] = new HybridFixed<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+        else if(_gConfiguration.GetAlgName(i).compare("hybrid-lru") == 0) {
+            _gTestCache[i] = new HybridLRU<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
         }
-        else if(_gConfiguration.GetAlgName(i).compare("hybrid-dynamic") == 0) {
-            _gTestCache[i] = new HybridDynamic<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
+        else if(_gConfiguration.GetAlgName(i).compare("hybrid-arc") == 0) {
+            _gTestCache[i] = new HybridARC<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
         }
         else if(_gConfiguration.GetAlgName(i).compare("hybrid-lrulfu") == 0) {
             _gTestCache[i] = new HybridLRULFU<uint64_t, cacheAtom>(cacheAll, _gConfiguration.cacheSize[i], i);
@@ -459,10 +459,6 @@ int main(int argc, char **argv)
         ||_gConfiguration.GetAlgName(0).compare("wnrdad") == 0
         ||_gConfiguration.GetAlgName(0).compare("wdrdnd") == 0
         ||_gConfiguration.GetAlgName(0).compare("wdrdad") == 0
-        ||_gConfiguration.GetAlgName(0).compare("hybrid-dynamic") == 0
-        ||_gConfiguration.GetAlgName(0).compare("hybrid-dynamic-withpcr") == 0
-        ||_gConfiguration.GetAlgName(0).compare("hybrid-fixed") == 0
-        ||_gConfiguration.GetAlgName(0).compare("hybrid-lrulfu") == 0
 
         ||_gConfiguration.GetAlgName(0).compare("lru-wsr") == 0
         ||_gConfiguration.GetAlgName(0).compare("darc") == 0
@@ -480,9 +476,9 @@ int main(int argc, char **argv)
 
 
     if(_gConfiguration.GetAlgName(0).compare("nvm-dram") == 0
-            ||_gConfiguration.GetAlgName(0).compare("hybrid-dynamic") == 0
+            ||_gConfiguration.GetAlgName(0).compare("hybrid-arc") == 0
             ||_gConfiguration.GetAlgName(0).compare("hybrid-dynamic-withpcr") == 0
-            ||_gConfiguration.GetAlgName(0).compare("hybrid-fixed") == 0
+            ||_gConfiguration.GetAlgName(0).compare("hybrid-lru") == 0
             ||_gConfiguration.GetAlgName(0).compare("hybrid-lrulfu") == 0
             ||_gConfiguration.GetAlgName(0).compare("hibachi") == 0
             ||_gConfiguration.GetAlgName(0).compare("wnrdnd") == 0

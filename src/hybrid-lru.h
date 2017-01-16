@@ -1,11 +1,11 @@
 //
-// C++ Implementation: hybrid-fixed, dram used for read and nvram used for write
+// C++ Implementation: hybrid-lru, dram used for read and nvram used for write
 //
 // Author: ziqi fan, UMN
 //
 
-#ifndef HybridFixed_H
-#define HybridFixed_H
+#ifndef HybridLRU_H
+#define HybridLRU_H
 
 #include <map>
 #include <list>
@@ -40,7 +40,7 @@ extern int readHitOnDRAM;
 // LRU-replacement cache of a function with signature
 // V f(K)
 template <typename K, typename V>
-class HybridFixed : public TestCache<K, V>
+class HybridLRU : public TestCache<K, V>
 {
 public:
     // Key access history, most recent at back
@@ -51,7 +51,7 @@ public:
 
     // Constuctor specifies the cached function and
     // the maximum number of records to be stored.
-    HybridFixed(
+    HybridLRU(
         V(*f)(const K & , V),
         size_t c,
         unsigned levelMinus

@@ -1,3 +1,5 @@
+cscope.out
+sim-ideal
 *.o
 *.stat
 *.cfg

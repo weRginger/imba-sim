@@ -1,11 +1,11 @@
 //
-// C++ Implementation: hybrid-dynamic, nvram can be borrowed to cache clean pages
+// C++ Implementation: hybrid-arc, nvram can be borrowed to cache clean pages
 //
 // Author: ziqi fan, UMN
 //
 
-#ifndef HybridDynamic_H
-#define HybridDynamic_H
+#ifndef HybridARC_H
+#define HybridARC_H
 
 #include <map>
 #include <list>
@@ -40,7 +40,7 @@ extern int readHitOnDRAM;
 // LRU-replacement cache of a function with signature
 // V f(K)
 template <typename K, typename V>
-class HybridDynamic : public TestCache<K, V>
+class HybridARC : public TestCache<K, V>
 {
 public:
     // Key access history, most recent at back
@@ -51,7 +51,7 @@ public:
 
     // Constuctor specifies the cached function and
     // the maximum number of records to be stored.
-    HybridDynamic(
+    HybridARC(
         V(*f)(const K & , V),
         size_t c,
         unsigned levelMinus
